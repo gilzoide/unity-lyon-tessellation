@@ -6,11 +6,11 @@ use lyon_path::math::Point;
 #[repr(C)]
 pub struct UnityPathEvent {
     event: i32,
+    close: i32,
     from: Point,
     to: Point,
     ctrl1: Point,
     ctrl2: Point,
-    close: bool,
 }
 
 pub struct UnityPathEventIter {
@@ -61,7 +61,7 @@ impl Iterator for UnityPathEventIter {
                     4 => Some(Event::End {
                         last: current_event.from,
                         first: current_event.to,
-                        close: current_event.close,
+                        close: current_event.close != 0,
                     }),
                     _ => None,
                 }
