@@ -1,0 +1,11 @@
+{
+  "name": "com.gilzoide.lyon-tessellation",
+  "displayName": "Lyon Tessellation",
+  "version": "1.0.0-preview1",
+  "description": "Tessellation for vector graphics paths using the lyon tessellation library",
+  "homepage": "https://github.com/gilzoide/unity-lyon-tessellation",
+  "license": "Unlicense",
+  "author": {
+    "name": "Gil Barbosa Reis"
+  }
+}
