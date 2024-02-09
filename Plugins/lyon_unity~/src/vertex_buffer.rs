@@ -26,11 +26,14 @@ pub unsafe extern "C" fn lyon_unity_buffer_clear(buffer: &mut Buffer) {
 }
 
 #[no_mangle]
-pub unsafe extern "C" fn lyon_unity_buffer_get(buffer: &Buffer, vertices_ptr: *mut *const Point, vertices_length: *mut i32, indices_ptr: *mut *const u16, indices_length: *mut i32) {
+pub unsafe extern "C" fn lyon_unity_buffer_get_vertices(buffer: &Buffer, vertices_ptr: *mut *const Point, vertices_length: *mut i32) {
     let vertices = &buffer.vertices;
     *vertices_ptr = vertices.as_ptr();
     *vertices_length = vertices.len() as i32;
+}
 
+#[no_mangle]
+pub unsafe extern "C" fn lyon_unity_buffer_get_indices(buffer: &Buffer, indices_ptr: *mut *const u16, indices_length: *mut i32) {
     let indices = &buffer.indices;
     *indices_ptr = indices.as_ptr();
     *indices_length = indices.len() as i32;
