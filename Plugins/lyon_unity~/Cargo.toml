@@ -11,3 +11,6 @@ crate-type = ["cdylib"]
 [dependencies]
 lyon_path = "1.0.4"
 lyon_tessellation = "1.0.13"
+
+[profile.release]
+strip = "debuginfo"
