@@ -10,7 +10,7 @@ namespace Gilzoide.LyonTesselation
         [Min(0.01f)] public float Tolerance;
         public FillRule FillRule;
         public SweepOrientation SweepOrientation;
-        [MarshalAs(UnmanagedType.Bool)] public bool HandleIntersections;
+        public bool HandleIntersections;
 
         public const float DefaultTolerance = 0.1f;
         public const FillRule DefaultFillRule = FillRule.EvenOdd;

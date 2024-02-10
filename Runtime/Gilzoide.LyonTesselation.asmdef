@@ -2,6 +2,7 @@
     "name": "Gilzoide.LyonTesselation",
     "rootNamespace": "Gilzoide.LyonTesselation",
     "references": [
+        "Unity.Burst",
         "Unity.Collections"
     ],
     "includePlatforms": [],

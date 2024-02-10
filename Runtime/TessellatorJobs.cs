@@ -1,4 +1,5 @@
 using System;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
@@ -6,6 +7,7 @@ using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
+    [BurstCompile]
     public struct TessellationFillJob : IJob
     {
         public TessellationFillJob(Tessellator tessellator, PathBuilder pathBuilder, FillOptions? fillOptions)
@@ -39,6 +41,7 @@ namespace Gilzoide.LyonTesselation
         }
     }
 
+    [BurstCompile]
     public struct TessellationStrokeJob : IJob
     {
         public TessellationStrokeJob(Tessellator tessellator, PathBuilder pathBuilder, StrokeOptions? options)
