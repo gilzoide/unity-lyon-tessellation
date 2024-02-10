@@ -81,48 +81,36 @@ namespace Gilzoide.LyonTesselation
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public unsafe void AppendPathFill(PathBuilder pathBuilder, FillOptions? fillOptions = null)
+        public unsafe void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
 #endif
-            var points = pathBuilder.Points;
-            var verbs = pathBuilder.Verbs;
-            var options = fillOptions ?? FillOptions.Default();
-
-            LyonUnity.lyon_unity_triangulate_fill(
-                NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
-                verbs.Length,
-                ref options
-            );
+            unsafe
+            {
+                TessellationFillJob.ExecuteStatic(NativeHandle, pathBuilder.Points, pathBuilder.Verbs, options);
+            }
         }
 
-        public unsafe void AppendPathStroke(PathBuilder pathBuilder)
+        public void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? options = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
 #endif
-            var points = pathBuilder.Points;
-            var verbs = pathBuilder.Verbs;
-
-            LyonUnity.lyon_unity_triangulate_stroke(
-                NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
-                verbs.Length
-            );
+            unsafe
+            {
+                TessellationStrokeJob.ExecuteStatic(NativeHandle, pathBuilder.Points, pathBuilder.Verbs, options);
+            }
         }
 
-        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? fillOptions = null)
+        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? options = null)
         {
-            return new TessellationFillJob(this, pathBuilder, fillOptions);
+            return new TessellationFillJob(this, pathBuilder, options);
         }
 
-        public TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder)
+        public TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder, StrokeOptions? options)
         {
-            return new TessellationStrokeJob(this, pathBuilder);
+            return new TessellationStrokeJob(this, pathBuilder, options);
         }
 
         public void Dispose()

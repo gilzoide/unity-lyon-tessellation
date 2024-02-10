@@ -13,48 +13,62 @@ namespace Gilzoide.LyonTesselation
             _tessellatorHandle = tessellator.NativeHandle;
             _points = pathBuilder.Points;
             _verbs = pathBuilder.Verbs;
-            _fillOptions = fillOptions;
+            _options = fillOptions;
         }
 
         [NativeDisableUnsafePtrRestriction] private IntPtr _tessellatorHandle;
         private NativeArray<Vector2>.ReadOnly _points;
         private NativeArray<PathBuilder.Verb>.ReadOnly _verbs;
-        private FillOptions? _fillOptions;
+        private FillOptions? _options;
 
-        public unsafe void Execute()
+        public unsafe static void ExecuteStatic(IntPtr tessellatorHandle, NativeArray<Vector2>.ReadOnly points, NativeArray<PathBuilder.Verb>.ReadOnly verbs, FillOptions? options)
         {
-            FillOptions fillOptions = _fillOptions ?? FillOptions.Default();
+            FillOptions fillOptions = options ?? FillOptions.Default();
             LyonUnity.lyon_unity_triangulate_fill(
-                _tessellatorHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(_points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(_verbs),
-                _verbs.Length,
+                tessellatorHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length,
                 ref fillOptions
             );
+        }
+
+        public void Execute()
+        {
+            ExecuteStatic(_tessellatorHandle, _points, _verbs, _options);
         }
     }
 
     public struct TessellationStrokeJob : IJob
     {
-        public TessellationStrokeJob(Tessellator tessellator, PathBuilder pathBuilder)
+        public TessellationStrokeJob(Tessellator tessellator, PathBuilder pathBuilder, StrokeOptions? options)
         {
             _tessellatorHandle = tessellator.NativeHandle;
             _points = pathBuilder.Points;
             _verbs = pathBuilder.Verbs;
+            _options = options;
         }
 
         [NativeDisableUnsafePtrRestriction] private IntPtr _tessellatorHandle;
         private NativeArray<Vector2>.ReadOnly _points;
         private NativeArray<PathBuilder.Verb>.ReadOnly _verbs;
+        StrokeOptions? _options;
 
-        public unsafe void Execute()
+        public unsafe static void ExecuteStatic(IntPtr tessellatorHandle, NativeArray<Vector2>.ReadOnly points, NativeArray<PathBuilder.Verb>.ReadOnly verbs, StrokeOptions? options)
         {
+            StrokeOptions strokeOptions = options ?? StrokeOptions.Default();
             LyonUnity.lyon_unity_triangulate_stroke(
-                _tessellatorHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(_points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(_verbs),
-                _verbs.Length
+                tessellatorHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length,
+                ref strokeOptions
             );
+        }
+
+        public void Execute()
+        {
+            ExecuteStatic(_tessellatorHandle, _points, _verbs, _options);
         }
     }
 }
