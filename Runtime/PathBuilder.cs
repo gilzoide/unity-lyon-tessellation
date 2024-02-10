@@ -35,6 +35,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder BeginAt(Vector2 at)
         {
+            // TODO: track previous path ended
             _points.Add(at);
             _verbs.Add(Verb.Begin);
             return this;
@@ -72,6 +73,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder End()
         {
+            // TODO: track path began
             _verbs.Add(Verb.End);
             return this;
         }
