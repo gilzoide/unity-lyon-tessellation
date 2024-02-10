@@ -7,5 +7,9 @@
   "license": "Unlicense",
   "author": {
     "name": "Gil Barbosa Reis"
+  },
+  "dependencies": {
+    "com.unity.collections": "2.1.4",
+    "com.unity.burst": "1.8.11"
   }
 }
