@@ -6,7 +6,7 @@ use lyon_tessellation::StrokeOptions;
 use lyon_tessellation::VertexBuffers;
 use lyon_tessellation::geometry_builder::simple_builder;
 use lyon_tessellation::math::Point;
-use crate::path_event_iter::UnityPathEventIter;
+use crate::path_event_iter::UnityPathIterator;
 
 type Buffer = VertexBuffers<Point, u16>;
 
@@ -44,7 +44,7 @@ pub unsafe extern "C" fn lyon_unity_triangulate_fill(buffer: &mut Buffer, points
     let mut vertex_builder = simple_builder(buffer);
     let mut tessellator = FillTessellator::new();
     let result = tessellator.tessellate(
-        UnityPathEventIter::new(points, verbs, verbs_len),
+        UnityPathIterator::new(points, verbs, verbs_len),
         &FillOptions::default(),
         &mut vertex_builder
     );
@@ -59,7 +59,7 @@ pub unsafe extern "C" fn lyon_unity_triangulate_stroke(buffer: &mut Buffer, poin
     let mut vertex_builder = simple_builder(buffer);
     let mut tessellator = StrokeTessellator::new();
     let result = tessellator.tessellate(
-        UnityPathEventIter::new(points, verbs, verbs_len),
+        UnityPathIterator::new(points, verbs, verbs_len),
         &StrokeOptions::default(),
         &mut vertex_builder
     );

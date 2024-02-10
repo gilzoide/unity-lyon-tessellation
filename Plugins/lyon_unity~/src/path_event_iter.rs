@@ -3,7 +3,7 @@ use lyon_path::Event;
 use lyon_path::PathEvent;
 use lyon_path::math::Point;
 
-pub struct UnityPathEventIter {
+pub struct UnityPathIterator {
     points: *const Point,
     verbs: *const u8,
     verbs_left: i32,
@@ -11,7 +11,7 @@ pub struct UnityPathEventIter {
     first: Point,
 }
 
-impl UnityPathEventIter {
+impl UnityPathIterator {
     pub fn new(points: *const Point, verbs: *const u8, verbs_left: i32) -> Self {
         Self {
             points,
@@ -41,7 +41,7 @@ impl UnityPathEventIter {
     }
 }
 
-impl Iterator for UnityPathEventIter {
+impl Iterator for UnityPathIterator {
     type Item = PathEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
