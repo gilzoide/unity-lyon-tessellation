@@ -5,16 +5,16 @@ using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
-    public class TessellationBuffer : IDisposable
+    public class Tessellator : IDisposable
     {
         public IntPtr NativeHandle { get; private set; }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
         private AtomicSafetyHandle _atomicSafetyHandle;
-        private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<TessellationBuffer>();
+        private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<Tessellator>();
 #endif
 
-        public TessellationBuffer()
+        public Tessellator()
         {
             NativeHandle = LyonUnity.lyon_unity_buffer_new();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -24,7 +24,7 @@ namespace Gilzoide.LyonTesselation
 #endif
         }
 
-        ~TessellationBuffer()
+        ~Tessellator()
         {
             Dispose();
         }
@@ -111,6 +111,16 @@ namespace Gilzoide.LyonTesselation
                 (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
                 verbs.Length
             );
+        }
+
+        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder)
+        {
+            return new TessellationFillJob(this, pathBuilder);
+        }
+
+        public TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder)
+        {
+            return new TessellationStrokeJob(this, pathBuilder);
         }
 
         public void Dispose()
