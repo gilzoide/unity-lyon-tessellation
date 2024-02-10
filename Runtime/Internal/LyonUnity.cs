@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Gilzoide.LyonTesselation
+namespace Gilzoide.LyonTesselation.Internal
 {
     internal unsafe static class LyonUnity
     {

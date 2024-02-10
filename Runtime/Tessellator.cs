@@ -1,4 +1,5 @@
 using System;
+using Gilzoide.LyonTesselation.Internal;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
