@@ -26,7 +26,7 @@ namespace Gilzoide.LyonTesselation
         public static extern void lyon_unity_buffer_get_indices(IntPtr buffer, out ushort* indicesPtr, out int indicesLength);
 
         [DllImport(LibraryPath)]
-        public static extern void lyon_unity_triangulate_fill(IntPtr buffer, Vector2* points, byte* verbs, int verbsLength);
+        public static extern void lyon_unity_triangulate_fill(IntPtr buffer, Vector2* points, byte* verbs, int verbsLength, ref FillOptions fillOptions);
 
         [DllImport(LibraryPath)]
         public static extern void lyon_unity_triangulate_stroke(IntPtr buffer, Vector2* points, byte* verbs, int verbsLength);

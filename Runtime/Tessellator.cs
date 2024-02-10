@@ -81,19 +81,21 @@ namespace Gilzoide.LyonTesselation
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public unsafe void AppendPathFill(PathBuilder pathBuilder)
+        public unsafe void AppendPathFill(PathBuilder pathBuilder, FillOptions? fillOptions = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
 #endif
             var points = pathBuilder.Points;
             var verbs = pathBuilder.Verbs;
+            var options = fillOptions ?? FillOptions.Default();
 
             LyonUnity.lyon_unity_triangulate_fill(
                 NativeHandle,
                 (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
                 (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
-                verbs.Length
+                verbs.Length,
+                ref options
             );
         }
 
@@ -113,9 +115,9 @@ namespace Gilzoide.LyonTesselation
             );
         }
 
-        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder)
+        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? fillOptions = null)
         {
-            return new TessellationFillJob(this, pathBuilder);
+            return new TessellationFillJob(this, pathBuilder, fillOptions);
         }
 
         public TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder)
