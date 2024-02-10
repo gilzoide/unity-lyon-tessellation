@@ -29,7 +29,7 @@ namespace Gilzoide.LyonTesselation
             Dispose();
         }
 
-        public NativeSlice<Vector2> Vertices
+        public NativeArray<Vector2> Vertices
         {
             get
             {
@@ -42,16 +42,16 @@ namespace Gilzoide.LyonTesselation
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
                     LyonUnity.lyon_unity_buffer_get_vertices(NativeHandle, out Vector2* ptr, out int size);
-                    NativeSlice<Vector2> slice = NativeSliceUnsafeUtility.ConvertExistingDataToNativeSlice<Vector2>(ptr, 0, size);
+                    NativeArray<Vector2> slice = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector2>(ptr, size, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeSliceUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
 #endif
                     return slice;
                 }
             }
         }
 
-        public NativeSlice<ushort> Indices
+        public NativeArray<ushort> Indices
         {
             get
             {
@@ -64,9 +64,9 @@ namespace Gilzoide.LyonTesselation
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
                     LyonUnity.lyon_unity_buffer_get_indices(NativeHandle, out ushort* ptr, out int size);
-                    NativeSlice<ushort> slice = NativeSliceUnsafeUtility.ConvertExistingDataToNativeSlice<ushort>(ptr, 0, size);
+                    NativeArray<ushort> slice = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<ushort>(ptr, size, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeSliceUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
 #endif
                     return slice;
                 }
@@ -81,69 +81,37 @@ namespace Gilzoide.LyonTesselation
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public unsafe void TriangulateFill(PathEvent* events, int eventsLength)
+        public unsafe void AppendPathFill(PathBuilder pathBuilder)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
 #endif
-            LyonUnity.lyon_unity_triangulate_fill(NativeHandle, events, eventsLength);
+            var points = pathBuilder.Points;
+            var verbs = pathBuilder.Verbs;
+
+            LyonUnity.lyon_unity_triangulate_fill(
+                NativeHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length
+            );
         }
 
-        public void TriangulateFill(PathEvent[] events)
-        {
-            unsafe
-            {
-                fixed (PathEvent* ptr = events)
-                {
-                    TriangulateFill(ptr, events.Length);
-                }
-            }
-        }
-
-#if UNITY_2021_2_OR_NEWER
-        public void TriangulateFill(ReadOnlySpan<PathEvent> events)
-        {
-            unsafe
-            {
-                fixed (PathEvent* ptr = events)
-                {
-                    TriangulateFill(ptr, events.Length);
-                }
-            }
-        }
-#endif
-
-        public unsafe void TriangulateStroke(PathEvent* events, int eventsLength)
+        public unsafe void AppendPathStroke(PathBuilder pathBuilder)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
 #endif
-            LyonUnity.lyon_unity_triangulate_stroke(NativeHandle, events, eventsLength);
-        }
+            var points = pathBuilder.Points;
+            var verbs = pathBuilder.Verbs;
 
-        public void TriangulateStroke(PathEvent[] events)
-        {
-            unsafe
-            {
-                fixed (PathEvent* ptr = events)
-                {
-                    TriangulateStroke(ptr, events.Length);
-                }
-            }
+            LyonUnity.lyon_unity_triangulate_stroke(
+                NativeHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length
+            );
         }
-
-#if UNITY_2021_2_OR_NEWER
-        public void TriangulateStroke(ReadOnlySpan<PathEvent> events)
-        {
-            unsafe
-            {
-                fixed (PathEvent* ptr = events)
-                {
-                    TriangulateStroke(ptr, events.Length);
-                }
-            }
-        }
-#endif
 
         public void Dispose()
         {

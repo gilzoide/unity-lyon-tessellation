@@ -3,29 +3,41 @@ use lyon_path::Event;
 use lyon_path::PathEvent;
 use lyon_path::math::Point;
 
-#[repr(C)]
-pub struct UnityPathEvent {
-    event: i32,
-    close: i32,
-    from: Point,
-    to: Point,
-    ctrl1: Point,
-    ctrl2: Point,
-}
-
 pub struct UnityPathEventIter {
-    events: *const UnityPathEvent,
-    len: usize,
-    current: usize,
+    points: *const Point,
+    verbs: *const u8,
+    verbs_left: i32,
+    current: Point,
+    first: Point,
 }
 
 impl UnityPathEventIter {
-    pub fn new(events: *const UnityPathEvent, len: i32) -> Self {
+    pub fn new(points: *const Point, verbs: *const u8, verbs_left: i32) -> Self {
         Self {
-            events: events,
-            len: len as usize,
-            current: 0,
+            points,
+            verbs,
+            verbs_left,
+            current: Point::default(),
+            first: Point::default(),
         }
+    }
+
+    unsafe fn pop_verb(&mut self) -> Option<u8> {
+        if self.verbs_left < 0 {
+            None
+        }
+        else {
+            let verb = *self.verbs;
+            self.verbs = self.verbs.add(1);
+            self.verbs_left -= 1;
+            Some(verb)
+        }
+    }
+
+    unsafe fn pop_point(&mut self) -> Point {
+        let point = *self.points;
+        self.points = self.points.add(1);
+        point
     }
 }
 
@@ -33,38 +45,69 @@ impl Iterator for UnityPathEventIter {
     type Item = PathEvent;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.current >= self.len {
-            None
-        }
-        else {
-            unsafe {
-                let current_event = &*self.events.add(self.current);
-                match current_event.event {
-                    0 => Some(Event::Begin {
-                        at: current_event.from,
-                    }),
-                    1 => Some(Event::Line {
-                        from: current_event.from,
-                        to: current_event.to,
-                    }),
-                    2 => Some(Event::Quadratic {
-                        from: current_event.from,
-                        ctrl: current_event.ctrl1,
-                        to: current_event.to,
-                    }),
-                    3 => Some(Event::Cubic {
-                        from: current_event.from,
-                        ctrl1: current_event.ctrl1,
-                        ctrl2: current_event.ctrl2,
-                        to: current_event.to,
-                    }),
-                    4 => Some(Event::End {
-                        last: current_event.from,
-                        first: current_event.to,
-                        close: current_event.close != 0,
-                    }),
-                    _ => None,
-                }
+        unsafe {
+            match self.pop_verb() {
+                Some(0) => {
+                    let at = self.pop_point();
+                    self.first = at;
+                    self.current = at;
+                    Some(Event::Begin {
+                        at,
+                    })
+                },
+                Some(1) => {
+                    let from = self.current;
+                    let to = self.pop_point();
+                    self.current = to;
+                    Some(Event::Line {
+                        from,
+                        to,
+                    })
+                },
+                Some(2) => {
+                    let from = self.current;
+                    let ctrl = self.pop_point();
+                    let to = self.pop_point();
+                    self.current = to;
+                    Some(Event::Quadratic {
+                        from,
+                        ctrl,
+                        to,
+                    })
+                },
+                Some(3) => {
+                    let from = self.current;
+                    let ctrl1 = self.pop_point();
+                    let ctrl2 = self.pop_point();
+                    let to = self.pop_point();
+                    self.current = to;
+                    Some(Event::Cubic {
+                        from,
+                        ctrl1,
+                        ctrl2,
+                        to,
+                    })
+                },
+                Some(4) => {
+                    let last = self.current;
+                    let first = self.first;
+                    self.current = first;
+                    Some(Event::End {
+                        last,
+                        first,
+                        close: true,
+                    })
+                },
+                Some(5) => {
+                    let last = self.current;
+                    let first = self.first;
+                    Some(Event::End {
+                        last,
+                        first,
+                        close: false,
+                    })
+                },
+                _ => None
             }
         }
     }

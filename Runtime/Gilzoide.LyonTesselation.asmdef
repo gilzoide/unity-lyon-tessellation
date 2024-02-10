@@ -1,7 +1,9 @@
 {
     "name": "Gilzoide.LyonTesselation",
     "rootNamespace": "Gilzoide.LyonTesselation",
-    "references": [],
+    "references": [
+        "Unity.Collections"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": true,
