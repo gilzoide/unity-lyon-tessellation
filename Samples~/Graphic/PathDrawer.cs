@@ -7,9 +7,11 @@ using UnityEngine.Pool;
 using UnityEngine.UI;
 
 [RequireComponent(typeof(CanvasRenderer))]
-public class PathFill : Graphic
+public class PathDrawer : Graphic
 {
     public FillOptions FillOptions = FillOptions.Default();
+    public StrokeOptions StrokeOptions = StrokeOptions.Default();
+    public bool Fill = true;
 
     private Tessellator<UIVertex, int> _tessellator;
     private JobHandle _jobHandle;
@@ -47,8 +49,15 @@ public class PathFill : Graphic
             ;
 
         _tessellator.Clear();
-        JobHandle fillJobHandle = _tessellator.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
-        _jobHandle = _tessellator.CreateUIVertexJob(this).Schedule(fillJobHandle);
+        if (Fill)
+        {
+            _jobHandle = _tessellator.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
+        }
+        else
+        {
+            _jobHandle = _tessellator.CreatePathStrokeJob(_pathBuilder, StrokeOptions).Schedule();
+        }
+        _jobHandle = _tessellator.CreateUIVertexJob(this).Schedule(_jobHandle);
         SetVerticesDirty();
     }
 
