@@ -37,11 +37,14 @@ public class PathFill : Graphic
         rectTransform.GetLocalCorners(corners);
         pathBuilder.Clear()
             .BeginAt(corners[0])
-            .QuadraticTo(center, corners[1])
-            .QuadraticTo(center, corners[2])
-            .QuadraticTo(center, corners[3])
-            .QuadraticTo(center, corners[0])
-            .End();
+                .QuadraticTo(center, corners[1])
+                .QuadraticTo(center, corners[2])
+                .QuadraticTo(center, corners[3])
+                .QuadraticTo(center, corners[0])
+            .End()
+            .AddEllipse(new Vector2(corners[0].x, center.y), new Vector2(10, 20))
+            .AddEllipse(new Vector2(corners[2].x, center.y), new Vector2(10, 20))
+            ;
 
         tessellator.Clear();
         JobHandle fillJobHandle = tessellator.CreatePathFillJob(pathBuilder, FillOptions).Schedule();

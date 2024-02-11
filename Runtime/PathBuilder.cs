@@ -85,6 +85,28 @@ namespace Gilzoide.LyonTesselation
             return this;
         }
 
+        public PathBuilder AddEllipse(Vector2 center, Vector2 size)
+        {
+            float w = size.x;
+            float h = size.y;
+            float x = center.x - w * 0.5f;
+            float y = center.y - h * 0.5f;
+            // Reference: https://stackoverflow.com/a/2173084
+            float kappa = .5522848f;
+            float ox = w * 0.5f * kappa; // control point offset horizontal
+            float oy = h * 0.5f * kappa; // control point offset vertical
+            float xe = x + w;            // x-end
+            float ye = y + h;            // y-end
+            float xm = x + w * 0.5f;     // x-middle
+            float ym = y + h * 0.5f;     // y-middle
+            return BeginAt(new Vector2(x, ym))
+                .CubicTo(new Vector2(x, ym - oy), new Vector2(xm - ox, y), new Vector2(xm, y))
+                .CubicTo(new Vector2(xm + ox, y), new Vector2(xe, ym - oy), new Vector2(xe, ym))
+                .CubicTo(new Vector2(xe, ym + oy), new Vector2(xm + ox, ye), new Vector2(xm, ye))
+                .CubicTo(new Vector2(xm - ox, ye), new Vector2(x, ym + oy), new Vector2(x, ym))
+                .End();
+        }
+
         public void Dispose()
         {
             if (_points.IsCreated)
