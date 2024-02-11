@@ -140,6 +140,11 @@ namespace Gilzoide.LyonTesselation
                 .End();
         }
 
+        public PathBuilder AddCircle(Vector2 center, float radius)
+        {
+            return AddEllipse(center, new Vector2(radius, radius));
+        }
+
         public void Dispose()
         {
             if (_points.IsCreated)
