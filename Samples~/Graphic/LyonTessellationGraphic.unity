@@ -279,10 +279,18 @@ MonoBehaviour:
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   FillOptions:
-    Tolerance: 0.5
+    Tolerance: 0.1
     FillRule: 0
     SweepOrientation: 0
     HandleIntersections: 0
+  StrokeOptions:
+    StartCap: 0
+    EndCap: 0
+    LineJoin: 0
+    LineWidth: 1
+    MiterLimit: 4
+    Tolerance: 0.1
+  Fill: 1
 --- !u!222 &272432367
 CanvasRenderer:
   m_ObjectHideFlags: 0

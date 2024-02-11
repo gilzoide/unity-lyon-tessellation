@@ -35,17 +35,13 @@ public class PathDrawer : Graphic
 
     private void Update()
     {
-        var center = rectTransform.rect.center;
+        Rect rect = rectTransform.rect;
+        Vector2 center = rect.center;
         rectTransform.GetLocalCorners(_corners);
         _pathBuilder.Clear()
-            .BeginAt(_corners[0])
-                .QuadraticTo(center, _corners[1])
-                .QuadraticTo(center, _corners[2])
-                .QuadraticTo(center, _corners[3])
-                .QuadraticTo(center, _corners[0])
-            .End()
             .AddEllipse(new Vector2(_corners[0].x, center.y), new Vector2(10, 20))
             .AddEllipse(new Vector2(_corners[2].x, center.y), new Vector2(10, 20))
+            .AddRoundedRect(rectTransform.rect, 10)
             ;
 
         _tessellator.Clear();
