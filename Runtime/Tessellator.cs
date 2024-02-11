@@ -6,29 +6,33 @@ using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
-    public class Tessellator : IDisposable
+    [NativeContainer]
+    public struct Tessellator : IDisposable
     {
+        [field: NativeDisableUnsafePtrRestriction]
         public IntPtr NativeHandle { get; private set; }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-        private AtomicSafetyHandle _atomicSafetyHandle;
+        private AtomicSafetyHandle m_Safety;
         private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<Tessellator>();
 #endif
 
-        public Tessellator()
+        public static Tessellator Create()
         {
-            NativeHandle = LyonUnity.lyon_unity_buffer_new();
+            return new Tessellator(LyonUnity.lyon_unity_buffer_new());
+        }
+
+        public Tessellator(IntPtr nativeHandle)
+        {
+            NativeHandle = nativeHandle;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            _atomicSafetyHandle = AtomicSafetyHandle.Create();
-            AtomicSafetyHandle.SetStaticSafetyId(ref _atomicSafetyHandle, _safetyId);
-            AtomicSafetyHandle.SetAllowSecondaryVersionWriting(_atomicSafetyHandle, false);
+            m_Safety = AtomicSafetyHandle.Create();
+            AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, _safetyId);
+            AtomicSafetyHandle.SetAllowSecondaryVersionWriting(m_Safety, false);
 #endif
         }
 
-        ~Tessellator()
-        {
-            Dispose();
-        }
+        public bool IsCreated => NativeHandle != IntPtr.Zero;
 
         public NativeArray<Vector2> Vertices
         {
@@ -37,9 +41,9 @@ namespace Gilzoide.LyonTesselation
                 unsafe
                 {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(_atomicSafetyHandle);
+                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
 
-                    AtomicSafetyHandle secondarySafetyHandle = _atomicSafetyHandle;
+                    AtomicSafetyHandle secondarySafetyHandle = m_Safety;
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
                     LyonUnity.lyon_unity_buffer_get_vertices(NativeHandle, out Vector2* ptr, out int size);
@@ -59,9 +63,9 @@ namespace Gilzoide.LyonTesselation
                 unsafe
                 {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(_atomicSafetyHandle);
+                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
 
-                    AtomicSafetyHandle secondarySafetyHandle = _atomicSafetyHandle;
+                    AtomicSafetyHandle secondarySafetyHandle = m_Safety;
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
                     LyonUnity.lyon_unity_buffer_get_indices(NativeHandle, out ushort* ptr, out int size);
@@ -77,31 +81,49 @@ namespace Gilzoide.LyonTesselation
         public void Clear()
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
+            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
 #endif
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public unsafe void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
+        public void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
         {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
-#endif
-            unsafe
-            {
-                TessellationFillJob.ExecuteStatic(NativeHandle, pathBuilder.Points, pathBuilder.Verbs, options);
-            }
+            AppendPathFill(pathBuilder.Points, pathBuilder.Verbs, options);
         }
 
-        public void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? options = null)
+        public unsafe void AppendPathFill(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, FillOptions? fillOptions = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(_atomicSafetyHandle);
+            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
 #endif
-            unsafe
-            {
-                TessellationStrokeJob.ExecuteStatic(NativeHandle, pathBuilder.Points, pathBuilder.Verbs, options);
-            }
+            FillOptions options = fillOptions ?? FillOptions.Default();
+            LyonUnity.lyon_unity_triangulate_fill(
+                NativeHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length,
+                ref options
+            );
+        }
+
+        public void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
+        {
+            AppendPathStroke(pathBuilder.Points, pathBuilder.Verbs, strokeOptions);
+        }
+
+        public unsafe void AppendPathStroke(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, StrokeOptions? strokeOptions = null)
+        {
+#if ENABLE_UNITY_COLLECTIONS_CHECKS
+            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
+#endif
+            StrokeOptions options = strokeOptions ?? StrokeOptions.Default();
+            LyonUnity.lyon_unity_triangulate_stroke(
+                NativeHandle,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
+                verbs.Length,
+                ref options
+            );
         }
 
         public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? options = null)
@@ -123,9 +145,20 @@ namespace Gilzoide.LyonTesselation
             }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckDeallocateAndThrow(_atomicSafetyHandle);
-            AtomicSafetyHandle.Release(_atomicSafetyHandle);
+            if (AtomicSafetyHandle.IsHandleValid(m_Safety))
+            {
+                AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
+                AtomicSafetyHandle.Release(m_Safety);
+            }
 #endif
+        }
+
+        internal void ThrowIfNotCreated()
+        {
+            if (!IsCreated)
+            {
+                throw new NullReferenceException($"{nameof(Tessellator)} was Disposed of or never created.");
+            }
         }
     }
 }

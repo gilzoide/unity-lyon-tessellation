@@ -19,8 +19,8 @@ namespace Gilzoide.LyonTesselation
         private NativeList<Vector2> _points;
         private NativeList<Verb> _verbs;
 
-        public NativeArray<Vector2>.ReadOnly Points => _points.AsReadOnly();
-        public NativeArray<Verb>.ReadOnly Verbs => _verbs.AsReadOnly();
+        public NativeArray<Vector2> Points => _points;
+        public NativeArray<Verb> Verbs => _verbs;
 
         public PathBuilder(Allocator allocator)
         {
