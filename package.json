@@ -12,5 +12,12 @@
     "com.unity.collections": "1.0.0",
     "com.unity.burst": "1.8.12"
   },
-  "unity": "2020.3"
+  "unity": "2020.3",
+  "samples": [
+    {
+        "displayName": "UI Graphic using paths",
+        "description": "Simple sample showing how to fill a Graphic mesh using PathBuilder and Tessellator.",
+        "path": "Samples~/Graphic"
+    }
+  ]
 }
