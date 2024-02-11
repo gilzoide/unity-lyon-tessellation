@@ -11,56 +11,56 @@ public class PathFill : Graphic
 {
     public FillOptions FillOptions = FillOptions.Default();
 
-    private Tessellator<UIVertex, int> tessellator;
-    private JobHandle jobHandle;
-    private PathBuilder pathBuilder;
-    private Vector3[] corners = new Vector3[4];
+    private Tessellator<UIVertex, int> _tessellator;
+    private JobHandle _jobHandle;
+    private PathBuilder _pathBuilder;
+    private Vector3[] _corners = new Vector3[4];
 
     protected override void OnEnable()
     {
-        tessellator = Tessellator<UIVertex, int>.Create();
-        pathBuilder = new PathBuilder(Allocator.Persistent);
+        _tessellator = Tessellator<UIVertex, int>.Create();
+        _pathBuilder = new PathBuilder(Allocator.Persistent);
         base.OnEnable();
     }
 
     protected override void OnDisable()
     {
         base.OnDisable();
-        jobHandle.Complete();
-        tessellator.Dispose();
-        pathBuilder.Dispose();
+        _jobHandle.Complete();
+        _tessellator.Dispose();
+        _pathBuilder.Dispose();
     }
 
     private void Update()
     {
         var center = rectTransform.rect.center;
-        rectTransform.GetLocalCorners(corners);
-        pathBuilder.Clear()
-            .BeginAt(corners[0])
-                .QuadraticTo(center, corners[1])
-                .QuadraticTo(center, corners[2])
-                .QuadraticTo(center, corners[3])
-                .QuadraticTo(center, corners[0])
+        rectTransform.GetLocalCorners(_corners);
+        _pathBuilder.Clear()
+            .BeginAt(_corners[0])
+                .QuadraticTo(center, _corners[1])
+                .QuadraticTo(center, _corners[2])
+                .QuadraticTo(center, _corners[3])
+                .QuadraticTo(center, _corners[0])
             .End()
-            .AddEllipse(new Vector2(corners[0].x, center.y), new Vector2(10, 20))
-            .AddEllipse(new Vector2(corners[2].x, center.y), new Vector2(10, 20))
+            .AddEllipse(new Vector2(_corners[0].x, center.y), new Vector2(10, 20))
+            .AddEllipse(new Vector2(_corners[2].x, center.y), new Vector2(10, 20))
             ;
 
-        tessellator.Clear();
-        JobHandle fillJobHandle = tessellator.CreatePathFillJob(pathBuilder, FillOptions).Schedule();
-        jobHandle = tessellator.CreateUIVertexJob(this).Schedule(fillJobHandle);
+        _tessellator.Clear();
+        JobHandle fillJobHandle = _tessellator.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
+        _jobHandle = _tessellator.CreateUIVertexJob(this).Schedule(fillJobHandle);
         SetVerticesDirty();
     }
 
     protected override void OnPopulateMesh(VertexHelper vh)
     {
         vh.Clear();
-        jobHandle.Complete();
+        _jobHandle.Complete();
         using (ListPool<UIVertex>.Get(out List<UIVertex> vertices))
         using (ListPool<int>.Get(out List<int> indices))
         {
-            vertices.AddRange(tessellator.Vertices);
-            indices.AddRange(tessellator.Indices);
+            vertices.AddRange(_tessellator.Vertices);
+            indices.AddRange(_tessellator.Indices);
             vh.AddUIVertexStream(vertices, indices);
         }
     }
