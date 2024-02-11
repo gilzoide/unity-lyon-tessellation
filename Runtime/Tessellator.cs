@@ -38,6 +38,7 @@ namespace Gilzoide.LyonTesselation
         {
             get
             {
+                ThrowIfNotCreated();
                 unsafe
                 {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -60,6 +61,7 @@ namespace Gilzoide.LyonTesselation
         {
             get
             {
+                ThrowIfNotCreated();
                 unsafe
                 {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -80,6 +82,7 @@ namespace Gilzoide.LyonTesselation
 
         public void Clear()
         {
+            ThrowIfNotCreated();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
 #endif
@@ -93,6 +96,7 @@ namespace Gilzoide.LyonTesselation
 
         public readonly unsafe void AppendPathFill(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, FillOptions? fillOptions = null)
         {
+            ThrowIfNotCreated();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
 #endif
@@ -113,6 +117,7 @@ namespace Gilzoide.LyonTesselation
 
         public readonly unsafe void AppendPathStroke(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, StrokeOptions? strokeOptions = null)
         {
+            ThrowIfNotCreated();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
 #endif
