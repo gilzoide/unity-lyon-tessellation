@@ -7,19 +7,25 @@ using UnityEngine;
 namespace Gilzoide.LyonTesselation
 {
     [NativeContainer]
-    public struct Tessellator : IDisposable
+    public struct Tessellator<TVertex, TIndex> : IDisposable
+        where TVertex : unmanaged
+        where TIndex : unmanaged
     {
         [field: NativeDisableUnsafePtrRestriction]
         public IntPtr NativeHandle { get; private set; }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
         private AtomicSafetyHandle m_Safety;
-        private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<Tessellator>();
+        private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<Tessellator<TVertex, TIndex>>();
 #endif
 
-        public static Tessellator Create()
+        public static Tessellator<TVertex, TIndex> Create()
         {
-            return new Tessellator(LyonUnity.lyon_unity_buffer_new());
+            unsafe
+            {
+                IntPtr nativeHandle = LyonUnity.lyon_unity_buffer_new(sizeof(TVertex), sizeof(TIndex));
+                return new Tessellator<TVertex, TIndex>(nativeHandle);
+            }
         }
 
         public Tessellator(IntPtr nativeHandle)
@@ -34,7 +40,7 @@ namespace Gilzoide.LyonTesselation
 
         public readonly bool IsCreated => NativeHandle != IntPtr.Zero;
 
-        public readonly NativeArray<Vector2> Vertices
+        public readonly NativeArray<TVertex> Vertices
         {
             get
             {
@@ -47,17 +53,17 @@ namespace Gilzoide.LyonTesselation
                     AtomicSafetyHandle secondarySafetyHandle = m_Safety;
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
-                    LyonUnity.lyon_unity_buffer_get_vertices(NativeHandle, out Vector2* ptr, out int size);
-                    NativeArray<Vector2> slice = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<Vector2>(ptr, size, Allocator.None);
+                    LyonUnity.lyon_unity_buffer_get_vertices(NativeHandle, out void* ptr, out int size);
+                    NativeArray<TVertex> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TVertex>(ptr, size, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, secondarySafetyHandle);
 #endif
-                    return slice;
+                    return array;
                 }
             }
         }
 
-        public readonly NativeArray<ushort> Indices
+        public readonly NativeArray<TIndex> Indices
         {
             get
             {
@@ -70,12 +76,12 @@ namespace Gilzoide.LyonTesselation
                     AtomicSafetyHandle secondarySafetyHandle = m_Safety;
                     AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
 #endif
-                    LyonUnity.lyon_unity_buffer_get_indices(NativeHandle, out ushort* ptr, out int size);
-                    NativeArray<ushort> slice = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<ushort>(ptr, size, Allocator.None);
+                    LyonUnity.lyon_unity_buffer_get_indices(NativeHandle, out void* ptr, out int size);
+                    NativeArray<TIndex> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TIndex>(ptr, size, Allocator.None);
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref slice, secondarySafetyHandle);
+                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, secondarySafetyHandle);
 #endif
-                    return slice;
+                    return array;
                 }
             }
         }
@@ -131,16 +137,6 @@ namespace Gilzoide.LyonTesselation
             );
         }
 
-        public readonly TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? options = null)
-        {
-            return new TessellationFillJob(this, pathBuilder, options);
-        }
-
-        public readonly TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder, StrokeOptions? options)
-        {
-            return new TessellationStrokeJob(this, pathBuilder, options);
-        }
-
         public void Dispose()
         {
             if (NativeHandle != IntPtr.Zero)
@@ -162,7 +158,7 @@ namespace Gilzoide.LyonTesselation
         {
             if (!IsCreated)
             {
-                throw new NullReferenceException($"{nameof(Tessellator)} was Disposed of or never created.");
+                throw new NullReferenceException("Tessellator was Disposed of or never created.");
             }
         }
     }

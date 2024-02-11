@@ -5,10 +5,29 @@ using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
-    [BurstCompile]
-    public struct TessellationFillJob : IJob
+    public static class TessellatorJobs
     {
-        public TessellationFillJob(Tessellator tessellator, PathBuilder pathBuilder, FillOptions? fillOptions)
+        public static TessellationFillJob<TVertex, TIndex> CreatePathFillJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> self, PathBuilder pathBuilder, FillOptions? options = null)
+            where TVertex : unmanaged
+            where TIndex : unmanaged
+        {
+            return new TessellationFillJob<TVertex, TIndex>(self, pathBuilder, options);
+        }
+
+        public static TessellationStrokeJob<TVertex, TIndex> CreatePathStrokeJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> self, PathBuilder pathBuilder, StrokeOptions? options)
+            where TVertex : unmanaged
+            where TIndex : unmanaged
+        {
+            return new TessellationStrokeJob<TVertex, TIndex>(self, pathBuilder, options);
+        }
+    }
+
+    [BurstCompile]
+    public struct TessellationFillJob<TVertex, TIndex> : IJob
+        where TVertex : unmanaged
+        where TIndex : unmanaged
+    {
+        public TessellationFillJob(Tessellator<TVertex, TIndex> tessellator, PathBuilder pathBuilder, FillOptions? fillOptions)
         {
             _tessellator = tessellator;
             _points = pathBuilder.Points;
@@ -16,21 +35,23 @@ namespace Gilzoide.LyonTesselation
             _options = fillOptions;
         }
 
-        private Tessellator _tessellator;
+        private Tessellator<TVertex, TIndex> _tessellator;
         [ReadOnly] private NativeArray<Vector2> _points;
         [ReadOnly] private NativeArray<PathBuilder.Verb> _verbs;
         private FillOptions? _options;
 
-        public void Execute()
+        public readonly void Execute()
         {
             _tessellator.AppendPathFill(_points, _verbs, _options);
         }
     }
 
     [BurstCompile]
-    public struct TessellationStrokeJob : IJob
+    public struct TessellationStrokeJob<TVertex, TIndex> : IJob
+        where TVertex : unmanaged
+        where TIndex : unmanaged
     {
-        public TessellationStrokeJob(Tessellator tessellator, PathBuilder pathBuilder, StrokeOptions? options)
+        public TessellationStrokeJob(Tessellator<TVertex, TIndex> tessellator, PathBuilder pathBuilder, StrokeOptions? options)
         {
             _tessellator = tessellator;
             _points = pathBuilder.Points;
@@ -38,12 +59,12 @@ namespace Gilzoide.LyonTesselation
             _options = options;
         }
 
-        private Tessellator _tessellator;
+        private Tessellator<TVertex, TIndex> _tessellator;
         [ReadOnly] private NativeArray<Vector2> _points;
         [ReadOnly] private NativeArray<PathBuilder.Verb> _verbs;
         StrokeOptions? _options;
 
-        public void Execute()
+        public readonly void Execute()
         {
             _tessellator.AppendPathStroke(_points, _verbs, _options);
         }
