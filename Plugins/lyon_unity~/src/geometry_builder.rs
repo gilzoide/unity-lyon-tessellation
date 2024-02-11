@@ -56,7 +56,7 @@ impl UnityGeometryBuilder {
             self.indices_len += 1;
             self.indices.resize(byte_len + self.index_size as usize, 0);
             match self.index_size {
-                s if s as usize == size_of::<u16>() => {
+                s if (s as usize) < size_of::<u32>() => {
                     match u16::try_from(index.0) {
                         Ok(i) => {
                             unsafe {
