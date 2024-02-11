@@ -16,11 +16,12 @@ namespace Gilzoide.LyonTesselation
             End = 5,
         }
 
-        private NativeList<Vector2> _points;
-        private NativeList<Verb> _verbs;
-
         public NativeArray<Vector2> Points => _points;
         public NativeArray<Verb> Verbs => _verbs;
+
+        private NativeList<Vector2> _points;
+        private NativeList<Verb> _verbs;
+        private bool _beganPath;
 
         public PathBuilder(Allocator allocator)
         {
@@ -35,7 +36,8 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder BeginAt(Vector2 at)
         {
-            // TODO: track previous path ended
+            ThrowIfBeganPath();
+            _beganPath = true;
             _points.Add(at);
             _verbs.Add(Verb.Begin);
             return this;
@@ -43,6 +45,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder LineTo(Vector2 to)
         {
+            ThrowIfNotBeganPath();
             _points.Add(to);
             _verbs.Add(Verb.LineTo);
             return this;
@@ -50,6 +53,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder QuadraticTo(Vector2 controlPoint, Vector2 to)
         {
+            ThrowIfNotBeganPath();
             _points.Add(controlPoint);
             _points.Add(to);
             _verbs.Add(Verb.QuadraticTo);
@@ -58,6 +62,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder CubicTo(Vector2 controlPoint1, Vector2 controlPoint2, Vector2 to)
         {
+            ThrowIfNotBeganPath();
             _points.Add(controlPoint1);
             _points.Add(controlPoint2);
             _points.Add(to);
@@ -67,13 +72,16 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder Close()
         {
+            ThrowIfNotBeganPath();
+            _beganPath = false;
             _verbs.Add(Verb.Close);
             return this;
         }
 
         public PathBuilder End()
         {
-            // TODO: track path began
+            ThrowIfNotBeganPath();
+            _beganPath = false;
             _verbs.Add(Verb.End);
             return this;
         }
@@ -87,6 +95,7 @@ namespace Gilzoide.LyonTesselation
 
         public PathBuilder AddEllipse(Vector2 center, Vector2 size)
         {
+            ThrowIfBeganPath();
             float w = size.x;
             float h = size.y;
             float x = center.x - w * 0.5f;
@@ -116,6 +125,22 @@ namespace Gilzoide.LyonTesselation
             if (_verbs.IsCreated)
             {
                 _verbs.Dispose();
+            }
+        }
+
+        protected void ThrowIfBeganPath()
+        {
+            if (_beganPath)
+            {
+                throw new InvalidOperationException("This method cannot be called while building path. Please call End or Close.");
+            }
+        }
+
+        protected void ThrowIfNotBeganPath()
+        {
+            if (!_beganPath)
+            {
+                throw new InvalidOperationException("This method can only be called while building path. Please call BeginAt.");
             }
         }
     }
