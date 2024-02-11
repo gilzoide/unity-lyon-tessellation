@@ -30,6 +30,17 @@ namespace Gilzoide.LyonTesselation
 
         public Tessellator(IntPtr nativeHandle)
         {
+            unsafe
+            {
+                if (sizeof(TVertex) < 2 * sizeof(float))
+                {
+                    throw new ArgumentException("Vertex size must fit at least 2 floats.", nameof(TVertex));
+                }
+                if (sizeof(TIndex) < sizeof(int) && sizeof(TIndex) != sizeof(ushort))
+                {
+                    throw new ArgumentException("Index size must fit at least one ushort.", nameof(TIndex));
+                }
+            }
             NativeHandle = nativeHandle;
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_Safety = AtomicSafetyHandle.Create();
