@@ -125,7 +125,7 @@ namespace Gilzoide.LyonTesselation
             float x = center.x - w * 0.5f;
             float y = center.y - h * 0.5f;
             // Reference: https://stackoverflow.com/a/2173084
-            float kappa = .5522848f;
+            const float kappa = .5522848f;
             float ox = w * 0.5f * kappa; // control point offset horizontal
             float oy = h * 0.5f * kappa; // control point offset vertical
             float xe = x + w;            // x-end
@@ -143,6 +143,19 @@ namespace Gilzoide.LyonTesselation
         public PathBuilder AddCircle(Vector2 center, float radius)
         {
             return AddEllipse(center, new Vector2(radius, radius));
+        }
+
+        public PathBuilder AddRect(Rect rect)
+        {
+            float xMin = rect.xMin;
+            float xMax = rect.xMax;
+            float yMin = rect.yMin;
+            float yMax = rect.yMax;
+            return BeginAt(new Vector2(xMin, yMin))
+                .LineTo(new Vector2(xMin, yMax))
+                .LineTo(new Vector2(xMax, yMax))
+                .LineTo(new Vector2(xMax, yMin))
+                .Close();
         }
 
         public void Dispose()
