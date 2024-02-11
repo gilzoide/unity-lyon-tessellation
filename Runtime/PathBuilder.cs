@@ -93,6 +93,30 @@ namespace Gilzoide.LyonTesselation
             return this;
         }
 
+        public PathBuilder AddLine(Vector2 from, Vector2 to)
+        {
+            ThrowIfBeganPath();
+            return BeginAt(from)
+                .LineTo(to)
+                .End();
+        }
+
+        public PathBuilder AddQuadratic(Vector2 from, Vector2 control, Vector2 to)
+        {
+            ThrowIfBeganPath();
+            return BeginAt(from)
+                .QuadraticTo(control, to)
+                .End();
+        }
+
+        public PathBuilder AddCubic(Vector2 from, Vector2 control1, Vector2 control2, Vector2 to)
+        {
+            ThrowIfBeganPath();
+            return BeginAt(from)
+                .CubicTo(control1, control2, to)
+                .End();
+        }
+
         public PathBuilder AddEllipse(Vector2 center, Vector2 size)
         {
             ThrowIfBeganPath();
