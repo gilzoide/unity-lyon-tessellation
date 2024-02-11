@@ -32,9 +32,9 @@ namespace Gilzoide.LyonTesselation
 #endif
         }
 
-        public bool IsCreated => NativeHandle != IntPtr.Zero;
+        public readonly bool IsCreated => NativeHandle != IntPtr.Zero;
 
-        public NativeArray<Vector2> Vertices
+        public readonly NativeArray<Vector2> Vertices
         {
             get
             {
@@ -56,7 +56,7 @@ namespace Gilzoide.LyonTesselation
             }
         }
 
-        public NativeArray<ushort> Indices
+        public readonly NativeArray<ushort> Indices
         {
             get
             {
@@ -86,12 +86,12 @@ namespace Gilzoide.LyonTesselation
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
+        public readonly void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
         {
             AppendPathFill(pathBuilder.Points, pathBuilder.Verbs, options);
         }
 
-        public unsafe void AppendPathFill(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, FillOptions? fillOptions = null)
+        public readonly unsafe void AppendPathFill(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, FillOptions? fillOptions = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
@@ -106,12 +106,12 @@ namespace Gilzoide.LyonTesselation
             );
         }
 
-        public void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
+        public readonly void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
         {
             AppendPathStroke(pathBuilder.Points, pathBuilder.Verbs, strokeOptions);
         }
 
-        public unsafe void AppendPathStroke(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, StrokeOptions? strokeOptions = null)
+        public readonly unsafe void AppendPathStroke(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, StrokeOptions? strokeOptions = null)
         {
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
@@ -126,12 +126,12 @@ namespace Gilzoide.LyonTesselation
             );
         }
 
-        public TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? options = null)
+        public readonly TessellationFillJob CreatePathFillJob(PathBuilder pathBuilder, FillOptions? options = null)
         {
             return new TessellationFillJob(this, pathBuilder, options);
         }
 
-        public TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder, StrokeOptions? options)
+        public readonly TessellationStrokeJob CreatePathStrokeJob(PathBuilder pathBuilder, StrokeOptions? options)
         {
             return new TessellationStrokeJob(this, pathBuilder, options);
         }
@@ -153,7 +153,7 @@ namespace Gilzoide.LyonTesselation
 #endif
         }
 
-        internal void ThrowIfNotCreated()
+        internal readonly void ThrowIfNotCreated()
         {
             if (!IsCreated)
             {
