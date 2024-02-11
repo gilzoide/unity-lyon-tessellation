@@ -158,6 +158,49 @@ namespace Gilzoide.LyonTesselation
                 .Close();
         }
 
+        public PathBuilder AddRoundedRect(Rect rect, float cornerRadius)
+        {
+            if (cornerRadius > 0)
+            {
+                float xMin = rect.xMin;
+                float xMax = rect.xMax;
+                float yMin = rect.yMin;
+                float yMax = rect.yMax;
+                // Reference: https://pomax.github.io/bezierinfo/#circles_cubic
+                const float factor = 0.551785f;
+                float controlOffset = cornerRadius * factor;
+                return BeginAt(new Vector2(xMin, yMin + cornerRadius))
+                    .CubicTo(
+                        new Vector2(xMin, yMin + cornerRadius - controlOffset),
+                        new Vector2(xMin + cornerRadius - controlOffset, yMin),
+                        new Vector2(xMin + cornerRadius, yMin)
+                    )
+                    .LineTo(new Vector2(xMax - cornerRadius, yMin))
+                    .CubicTo(
+                        new Vector2(xMax - cornerRadius + controlOffset, yMin),
+                        new Vector2(xMax, yMin + cornerRadius - controlOffset),
+                        new Vector2(xMax, yMin + cornerRadius)
+                    )
+                    .LineTo(new Vector2(xMax, yMax - cornerRadius))
+                    .CubicTo(
+                        new Vector2(xMax, yMax - cornerRadius + controlOffset),
+                        new Vector2(xMax - cornerRadius + controlOffset, yMax),
+                        new Vector2(xMax - cornerRadius, yMax)
+                    )
+                    .LineTo(new Vector2(xMin + cornerRadius, yMax))
+                    .CubicTo(
+                        new Vector2(xMin + cornerRadius - controlOffset, yMax),
+                        new Vector2(xMin, yMax - cornerRadius + controlOffset),
+                        new Vector2(xMin, yMax - cornerRadius)
+                    )
+                    .Close();
+            }
+            else
+            {
+                return AddRect(rect);
+            }
+        }
+
         public void Dispose()
         {
             if (_points.IsCreated)
