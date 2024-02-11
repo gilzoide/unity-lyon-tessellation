@@ -9,7 +9,8 @@
     "name": "Gil Barbosa Reis"
   },
   "dependencies": {
-    "com.unity.collections": "2.1.4",
-    "com.unity.burst": "1.8.11"
-  }
+    "com.unity.collections": "1.0.0",
+    "com.unity.burst": "1.8.12"
+  },
+  "unity": "2020.3"
 }
