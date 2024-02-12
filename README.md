@@ -12,6 +12,11 @@
 - Prebuilt for the following platforms: Windows (x86_64), Linux (x86_64), macOS (x86_64, arm64), iOS (arm64), Android (arm32, arm64, x86, x86_64)
 
 
+## Samples
+This package include the following sample scenes:
+- [Graphic](Samples~/Graphic): a smiley path being tessellated into a Unity UI Graphic.
+
+
 ## Usage example
 ```cs
 using Gilzoide.LyonTesselation;
@@ -55,9 +60,19 @@ fillJob.Complete();
 strokeJob.Complete();
 NativeArray<UIVertex> vertices = tessellator.Vertices;
 NativeArray<int> indices = tessellator.Indices;
-DoSomethingLikeFillAVertexHelper(vertices, indices);
 
-// 5. Dispose of paths and tessellators when not needed anymore.
+// 5. If you are using UIVertex, there is a helper job that fills
+// vertices color and UVs. You can use job dependencies to run it
+// right after tessellation ends.
+JobHandle dependency = JobHandle.CombineDependencies(fillJob, strokeJob);
+JobHandle uiVertexJob = tessellator.CreateUIVertexJob(color, rect).Schedule(dependency);
+// at some point, e.g. inside Graphic.OnPopulateMesh
+uiVertexJob.Complete()
+NativeArray<UIVertex> coloredVertices = tessellator.Vertices;
+NativeArray<int> indices = tessellator.Indices;
+// Check out the "Graphic" sample for an example of usage
+
+// 6. Dispose of paths and tessellators when not needed anymore.
 tessellator.Dispose();
 path.Dispose();
 ```
