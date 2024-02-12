@@ -23,7 +23,7 @@ namespace Gilzoide.LyonTesselation
         private NativeList<Verb> _verbs;
         private bool _beganPath;
 
-        public PathBuilder(Allocator allocator)
+        public PathBuilder(Allocator allocator = Allocator.Persistent)
         {
             _points = new NativeList<Vector2>(allocator);
             _verbs = new NativeList<Verb>(allocator);

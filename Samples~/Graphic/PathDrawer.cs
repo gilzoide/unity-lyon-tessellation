@@ -20,8 +20,8 @@ public class PathDrawer : Graphic
 
     protected override void OnEnable()
     {
-        _tessellator = Tessellator<UIVertex, int>.Create();
-        _pathBuilder = new PathBuilder(Allocator.Persistent);
+        _tessellator = Tessellator<UIVertex, int>.Allocate();
+        _pathBuilder = new PathBuilder();
         base.OnEnable();
     }
 
