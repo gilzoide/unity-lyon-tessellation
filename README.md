@@ -1,7 +1,8 @@
 # Lyon Tesselation
 (WIP) Tessellation of vector paths in Unity, powered by [lyon](https://github.com/nical/lyon).
 
-<img height="128" alt="Image showing a smiley face in the Unity editor built using this package" src="Extras~/sample-result.png">
+<img height="128" alt="Image showing a smiley face in the Unity editor built using this package" src="Extras~/sample-fill.png">
+<img height="128" alt="Image showing a smiley face in the Unity editor built using this package" src="Extras~/sample-stroke.png">
 
 ## Features
 - Supports both Fill and Stroke tessellation, with several configurations provided by lyon
