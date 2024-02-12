@@ -10,8 +10,8 @@ namespace Gilzoide.LyonTesselation
         {
             Begin = 0,
             LineTo = 1,
-            QuadraticTo = 2,
-            CubicTo = 3,
+            QuadraticBezierTo = 2,
+            CubicBezierTo = 3,
             Close = 4,
             End = 5,
         }
@@ -51,22 +51,22 @@ namespace Gilzoide.LyonTesselation
             return this;
         }
 
-        public PathBuilder QuadraticTo(Vector2 controlPoint, Vector2 to)
+        public PathBuilder QuadraticBezierTo(Vector2 controlPoint, Vector2 to)
         {
             ThrowIfNotBeganPath();
             _points.Add(controlPoint);
             _points.Add(to);
-            _verbs.Add(Verb.QuadraticTo);
+            _verbs.Add(Verb.QuadraticBezierTo);
             return this;
         }
 
-        public PathBuilder CubicTo(Vector2 controlPoint1, Vector2 controlPoint2, Vector2 to)
+        public PathBuilder CubicBezierTo(Vector2 controlPoint1, Vector2 controlPoint2, Vector2 to)
         {
             ThrowIfNotBeganPath();
             _points.Add(controlPoint1);
             _points.Add(controlPoint2);
             _points.Add(to);
-            _verbs.Add(Verb.CubicTo);
+            _verbs.Add(Verb.CubicBezierTo);
             return this;
         }
 
@@ -101,19 +101,19 @@ namespace Gilzoide.LyonTesselation
                 .End();
         }
 
-        public PathBuilder AddQuadratic(Vector2 from, Vector2 control, Vector2 to)
+        public PathBuilder AddQuadraticBezier(Vector2 from, Vector2 control, Vector2 to)
         {
             ThrowIfBeganPath();
             return BeginAt(from)
-                .QuadraticTo(control, to)
+                .QuadraticBezierTo(control, to)
                 .End();
         }
 
-        public PathBuilder AddCubic(Vector2 from, Vector2 control1, Vector2 control2, Vector2 to)
+        public PathBuilder AddCubicBezier(Vector2 from, Vector2 control1, Vector2 control2, Vector2 to)
         {
             ThrowIfBeganPath();
             return BeginAt(from)
-                .CubicTo(control1, control2, to)
+                .CubicBezierTo(control1, control2, to)
                 .End();
         }
 
@@ -133,10 +133,10 @@ namespace Gilzoide.LyonTesselation
             float xm = x + w * 0.5f;     // x-middle
             float ym = y + h * 0.5f;     // y-middle
             return BeginAt(new Vector2(x, ym))
-                .CubicTo(new Vector2(x, ym - oy), new Vector2(xm - ox, y), new Vector2(xm, y))
-                .CubicTo(new Vector2(xm + ox, y), new Vector2(xe, ym - oy), new Vector2(xe, ym))
-                .CubicTo(new Vector2(xe, ym + oy), new Vector2(xm + ox, ye), new Vector2(xm, ye))
-                .CubicTo(new Vector2(xm - ox, ye), new Vector2(x, ym + oy), new Vector2(x, ym))
+                    .CubicBezierTo(new Vector2(x, ym - oy), new Vector2(xm - ox, y), new Vector2(xm, y))
+                    .CubicBezierTo(new Vector2(xm + ox, y), new Vector2(xe, ym - oy), new Vector2(xe, ym))
+                    .CubicBezierTo(new Vector2(xe, ym + oy), new Vector2(xm + ox, ye), new Vector2(xm, ye))
+                    .CubicBezierTo(new Vector2(xm - ox, ye), new Vector2(x, ym + oy), new Vector2(x, ym))
                 .End();
         }
 
@@ -170,25 +170,25 @@ namespace Gilzoide.LyonTesselation
                 const float factor = 0.551785f;
                 float controlOffset = cornerRadius * factor;
                 return BeginAt(new Vector2(xMin, yMin + cornerRadius))
-                    .CubicTo(
+                    .CubicBezierTo(
                         new Vector2(xMin, yMin + cornerRadius - controlOffset),
                         new Vector2(xMin + cornerRadius - controlOffset, yMin),
                         new Vector2(xMin + cornerRadius, yMin)
                     )
                     .LineTo(new Vector2(xMax - cornerRadius, yMin))
-                    .CubicTo(
+                    .CubicBezierTo(
                         new Vector2(xMax - cornerRadius + controlOffset, yMin),
                         new Vector2(xMax, yMin + cornerRadius - controlOffset),
                         new Vector2(xMax, yMin + cornerRadius)
                     )
                     .LineTo(new Vector2(xMax, yMax - cornerRadius))
-                    .CubicTo(
+                    .CubicBezierTo(
                         new Vector2(xMax, yMax - cornerRadius + controlOffset),
                         new Vector2(xMax - cornerRadius + controlOffset, yMax),
                         new Vector2(xMax - cornerRadius, yMax)
                     )
                     .LineTo(new Vector2(xMin + cornerRadius, yMax))
-                    .CubicTo(
+                    .CubicBezierTo(
                         new Vector2(xMin + cornerRadius - controlOffset, yMax),
                         new Vector2(xMin, yMax - cornerRadius + controlOffset),
                         new Vector2(xMin, yMax - cornerRadius)
