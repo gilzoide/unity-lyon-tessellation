@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Gilzoide.LyonTesselation;
-using Unity.Collections;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.Pool;
@@ -13,10 +12,9 @@ public class PathDrawer : Graphic
     public StrokeOptions StrokeOptions = StrokeOptions.Default();
     public bool Fill = true;
 
+    private PathBuilder _pathBuilder;
     private Tessellator<UIVertex, int> _tessellator;
     private JobHandle _jobHandle;
-    private PathBuilder _pathBuilder;
-    private Vector3[] _corners = new Vector3[4];
 
     protected override void OnEnable()
     {
@@ -33,16 +31,20 @@ public class PathDrawer : Graphic
         _pathBuilder.Dispose();
     }
 
-    private void Update()
+    protected void Update()
     {
-        Rect rect = rectTransform.rect;
-        Vector2 center = rect.center;
-        rectTransform.GetLocalCorners(_corners);
+        Vector2 center = rectTransform.rect.center;
         _pathBuilder.Clear()
-            .AddEllipse(new Vector2(_corners[0].x, center.y), new Vector2(10, 20))
-            .AddEllipse(new Vector2(_corners[2].x, center.y), new Vector2(10, 20))
-            .AddRoundedRect(rectTransform.rect, 10)
-            ;
+            .AddCircle(center, 100)
+            .AddCircle(new Vector2(center.x - 20, center.y + 20), 20)
+            .AddCircle(new Vector2(center.x + 20, center.y + 20), 20)
+            .BeginAt(new Vector2(center.x - 30, center.y - 5))
+                .CubicTo(
+                    new Vector2(center.x - 30, center.y - 45),
+                    new Vector2(center.x + 30, center.y - 45),
+                    new Vector2(center.x + 30, center.y - 5)
+                )
+            .Close();
 
         _tessellator.Clear();
         if (Fill)
