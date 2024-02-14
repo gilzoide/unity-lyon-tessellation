@@ -154,7 +154,7 @@ namespace Gilzoide.LyonTesselation
             }
 
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
-            if (AtomicSafetyHandle.IsHandleValid(m_Safety))
+            if (AtomicSafetyHandle.IsValidNonDefaultHandle(m_Safety))
             {
                 AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
                 AtomicSafetyHandle.Release(m_Safety);
