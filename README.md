@@ -42,7 +42,7 @@ path.AddCircle(Vector2.zero, 100)
 // - Vertex type must contain at least 2 floats, for the position
 // - Index type should be an integer of at least 16 bits (ushort, int...)
 // In this example, we'll use UIVertex for building meshes for Unity UI.
-var tessellator = Tessellator<UIVertex, int>.Allocate();
+var tessellator = new Tessellator<UIVertex, int>();
 
 // 3. Tessellate! This will fill the tessellator's internal buffers
 // 3.a) AppendPathFill will triangulate the path's fill
