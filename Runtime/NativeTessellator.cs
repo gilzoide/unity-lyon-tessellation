@@ -43,7 +43,6 @@ namespace Gilzoide.LyonTesselation
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
             m_Safety = AtomicSafetyHandle.Create();
             AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, _safetyId);
-            AtomicSafetyHandle.SetAllowSecondaryVersionWriting(m_Safety, false);
 #endif
         }
 
