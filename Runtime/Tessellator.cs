@@ -103,12 +103,7 @@ namespace Gilzoide.LyonTesselation
             LyonUnity.lyon_unity_buffer_clear(NativeHandle);
         }
 
-        public readonly void AppendPathFill(PathBuilder pathBuilder, FillOptions? options = null)
-        {
-            AppendPathFill(pathBuilder.Points, pathBuilder.Verbs, options);
-        }
-
-        public readonly unsafe void AppendPathFill(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, FillOptions? fillOptions = null)
+        public readonly unsafe void AppendPathFill(NativePathBuilder pathBuilder, FillOptions? fillOptions = null)
         {
             ThrowIfNotCreated();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -117,19 +112,14 @@ namespace Gilzoide.LyonTesselation
             FillOptions options = fillOptions ?? FillOptions.Default();
             LyonUnity.lyon_unity_triangulate_fill(
                 NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
-                verbs.Length,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Verbs),
+                pathBuilder.Verbs.Length,
                 ref options
             );
         }
 
-        public readonly void AppendPathStroke(PathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
-        {
-            AppendPathStroke(pathBuilder.Points, pathBuilder.Verbs, strokeOptions);
-        }
-
-        public readonly unsafe void AppendPathStroke(NativeArray<Vector2> points, NativeArray<PathBuilder.Verb> verbs, StrokeOptions? strokeOptions = null)
+        public readonly unsafe void AppendPathStroke(NativePathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
         {
             ThrowIfNotCreated();
 #if ENABLE_UNITY_COLLECTIONS_CHECKS
@@ -138,9 +128,9 @@ namespace Gilzoide.LyonTesselation
             StrokeOptions options = strokeOptions ?? StrokeOptions.Default();
             LyonUnity.lyon_unity_triangulate_stroke(
                 NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(verbs),
-                verbs.Length,
+                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Points),
+                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Verbs),
+                pathBuilder.Verbs.Length,
                 ref options
             );
         }
