@@ -12,10 +12,22 @@ namespace Gilzoide.LyonTesselation
         public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this Tessellator<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
             where TIndex : unmanaged
         {
+            return tessellator.NativeHandle.CreateUIVertexJob(graphic.color, graphic.rectTransform.rect, uv);
+        }
+
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeTessellator<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
+            where TIndex : unmanaged
+        {
             return tessellator.CreateUIVertexJob(graphic.color, graphic.rectTransform.rect, uv);
         }
 
         public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this Tessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
+            where TIndex : unmanaged
+        {
+            return tessellator.NativeHandle.CreateUIVertexJob(color,rect, uv);
+        }
+
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeTessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
             where TIndex : unmanaged
         {
             return new TessellationUIVertexJob<TIndex>(tessellator, color, rect, uv);
@@ -27,7 +39,7 @@ namespace Gilzoide.LyonTesselation
     public struct TessellationUIVertexJob<TIndex> : IJob
         where TIndex : unmanaged
     {
-        public TessellationUIVertexJob(Tessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv)
+        public TessellationUIVertexJob(NativeTessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv)
         {
             _tessellator = tessellator;
             _color = color;
@@ -35,7 +47,7 @@ namespace Gilzoide.LyonTesselation
             _uv = uv;
         }
 
-        private Tessellator<UIVertex, TIndex> _tessellator;
+        private NativeTessellator<UIVertex, TIndex> _tessellator;
         private Color32 _color;
         private Rect _rect;
         private Vector4? _uv;

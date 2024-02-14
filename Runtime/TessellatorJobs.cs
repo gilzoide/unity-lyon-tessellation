@@ -6,18 +6,32 @@ namespace Gilzoide.LyonTesselation
 {
     public static class TessellatorJobs
     {
-        public static TessellationFillJob<TVertex, TIndex> CreatePathFillJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> self, NativePathBuilder pathBuilder, FillOptions? options = null)
+        public static TessellationFillJob<TVertex, TIndex> CreatePathFillJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, FillOptions? options = null)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
-            return new TessellationFillJob<TVertex, TIndex>(self, pathBuilder, options);
+            return tessellator.NativeHandle.CreatePathFillJob(pathBuilder, options);
         }
 
-        public static TessellationStrokeJob<TVertex, TIndex> CreatePathStrokeJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> self, NativePathBuilder pathBuilder, StrokeOptions? options)
+        public static TessellationFillJob<TVertex, TIndex> CreatePathFillJob<TVertex, TIndex>(this NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, FillOptions? options = null)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
-            return new TessellationStrokeJob<TVertex, TIndex>(self, pathBuilder, options);
+            return new TessellationFillJob<TVertex, TIndex>(tessellator, pathBuilder, options);
+        }
+
+        public static TessellationStrokeJob<TVertex, TIndex> CreatePathStrokeJob<TVertex, TIndex>(this Tessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, StrokeOptions? options)
+            where TVertex : unmanaged
+            where TIndex : unmanaged
+        {
+            return tessellator.NativeHandle.CreatePathStrokeJob(pathBuilder, options);
+        }
+
+        public static TessellationStrokeJob<TVertex, TIndex> CreatePathStrokeJob<TVertex, TIndex>(this NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, StrokeOptions? options)
+            where TVertex : unmanaged
+            where TIndex : unmanaged
+        {
+            return new TessellationStrokeJob<TVertex, TIndex>(tessellator, pathBuilder, options);
         }
     }
 
@@ -26,14 +40,14 @@ namespace Gilzoide.LyonTesselation
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
-        public TessellationFillJob(Tessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, FillOptions? fillOptions)
+        public TessellationFillJob(NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, FillOptions? fillOptions)
         {
             _tessellator = tessellator;
             _pathBuilder = pathBuilder;
             _options = fillOptions;
         }
 
-        private Tessellator<TVertex, TIndex> _tessellator;
+        private NativeTessellator<TVertex, TIndex> _tessellator;
         [ReadOnly] private NativePathBuilder _pathBuilder;
         private FillOptions? _options;
 
@@ -48,14 +62,14 @@ namespace Gilzoide.LyonTesselation
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
-        public TessellationStrokeJob(Tessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, StrokeOptions? options)
+        public TessellationStrokeJob(NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, StrokeOptions? options)
         {
             _tessellator = tessellator;
             _pathBuilder = pathBuilder;
             _options = options;
         }
 
-        private Tessellator<TVertex, TIndex> _tessellator;
+        private NativeTessellator<TVertex, TIndex> _tessellator;
         [ReadOnly] private NativePathBuilder _pathBuilder;
         StrokeOptions? _options;
 
