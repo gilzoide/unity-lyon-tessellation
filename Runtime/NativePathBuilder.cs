@@ -1,10 +1,11 @@
 using System;
 using Unity.Collections;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
-    public struct NativePathBuilder : IDisposable
+    public struct NativePathBuilder : IDisposable, INativeDisposable
     {
         public readonly NativeArray<Vector2> Points => _points;
         public readonly NativeArray<PathVerb> Verbs => _verbs;
@@ -185,6 +186,11 @@ namespace Gilzoide.LyonTesselation
             {
                 _verbs.Dispose();
             }
+        }
+
+        public readonly JobHandle Dispose(JobHandle inputDeps)
+        {
+            return this.ScheduleDisposeJob(inputDeps);
         }
 
         internal readonly void ThrowIfBeganPath()

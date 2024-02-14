@@ -2,12 +2,13 @@ using System;
 using Gilzoide.LyonTesselation.Internal;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
+using Unity.Jobs;
 using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
     [NativeContainer]
-    public struct Tessellator<TVertex, TIndex> : IDisposable
+    public struct Tessellator<TVertex, TIndex> : IDisposable, INativeDisposable
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
@@ -150,6 +151,11 @@ namespace Gilzoide.LyonTesselation
                 AtomicSafetyHandle.Release(m_Safety);
             }
 #endif
+        }
+
+        public readonly JobHandle Dispose(JobHandle inputDeps)
+        {
+            return this.ScheduleDisposeJob(inputDeps);
         }
 
         internal readonly void ThrowIfNotCreated()
