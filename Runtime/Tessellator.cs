@@ -3,7 +3,7 @@ using Unity.Collections;
 
 namespace Gilzoide.LyonTesselation
 {
-    public class Tessellator<TVertex, TIndex> : IDisposable
+    public class Tessellator<TVertex, TIndex> : ITessellator<TVertex, TIndex>, IDisposable
         where TVertex : unmanaged
         where TIndex : unmanaged
     {

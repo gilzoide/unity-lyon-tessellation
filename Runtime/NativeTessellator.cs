@@ -8,7 +8,7 @@ using UnityEngine;
 namespace Gilzoide.LyonTesselation
 {
     [NativeContainer]
-    public struct NativeTessellator<TVertex, TIndex> : IDisposable, INativeDisposable
+    public struct NativeTessellator<TVertex, TIndex> : ITessellator<TVertex, TIndex>, IDisposable, INativeDisposable
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
