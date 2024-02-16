@@ -3,24 +3,19 @@ using Gilzoide.LyonTesselation.Internal;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
-using UnityEngine;
 
 namespace Gilzoide.LyonTesselation
 {
-    [NativeContainer]
-    public struct NativeTessellator<TVertex, TIndex> : ITessellator<TVertex, TIndex>, IDisposable, INativeDisposable
+    public unsafe struct NativeTessellator<TVertex, TIndex> : ITessellator<TVertex, TIndex>, IDisposable, INativeDisposable
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
-        [field: NativeDisableUnsafePtrRestriction]
-        public IntPtr NativeHandle { get; private set; }
+        internal readonly NativeList<byte> VertexBuffer => _vertexBuffer;
+        internal readonly NativeList<byte> IndexBuffer => _indexBuffer;
+        private NativeList<byte> _vertexBuffer;
+        private NativeList<byte> _indexBuffer;
 
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-        private AtomicSafetyHandle m_Safety;
-        private static readonly int _safetyId = AtomicSafetyHandle.NewStaticSafetyId<NativeTessellator<TVertex, TIndex>>();
-#endif
-
-        public static NativeTessellator<TVertex, TIndex> Allocate()
+        public NativeTessellator(Allocator allocator = Allocator.Persistent)
         {
             unsafe
             {
@@ -32,137 +27,52 @@ namespace Gilzoide.LyonTesselation
                 {
                     throw new ArgumentException("Index size must fit at least one ushort.", nameof(TIndex));
                 }
-                IntPtr nativeHandle = LyonUnity.lyon_unity_buffer_new(sizeof(TVertex), sizeof(TIndex));
-                return new NativeTessellator<TVertex, TIndex>(nativeHandle);
             }
+            _vertexBuffer = new NativeList<byte>(allocator);
+            _indexBuffer = new NativeList<byte>(allocator);
         }
 
-        public NativeTessellator(IntPtr nativeHandle)
-        {
-            NativeHandle = nativeHandle;
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            m_Safety = AtomicSafetyHandle.Create();
-            AtomicSafetyHandle.SetStaticSafetyId(ref m_Safety, _safetyId);
-#endif
-        }
+        public readonly bool IsCreated => _vertexBuffer.IsCreated && _indexBuffer.IsCreated;
+        public readonly int VerticesLength => _vertexBuffer.Length / sizeof(TVertex);
+        public readonly int IndicesLength => _indexBuffer.Length / sizeof(TIndex);
 
-        public readonly bool IsCreated => NativeHandle != IntPtr.Zero;
+        public readonly NativeArray<TVertex> Vertices => _vertexBuffer.AsArray().Reinterpret<TVertex>(sizeof(byte));
+        public readonly NativeArray<TIndex> Indices => _indexBuffer.AsArray().Reinterpret<TIndex>(sizeof(byte));
 
-        public readonly NativeArray<TVertex> Vertices
-        {
-            get
-            {
-                ThrowIfNotCreated();
-                unsafe
-                {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
-
-                    AtomicSafetyHandle secondarySafetyHandle = m_Safety;
-                    AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
-#endif
-                    LyonUnity.lyon_unity_buffer_get_vertices(NativeHandle, out void* ptr, out int size);
-                    NativeArray<TVertex> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TVertex>(ptr, size, Allocator.None);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, secondarySafetyHandle);
-#endif
-                    return array;
-                }
-            }
-        }
-
-        public readonly NativeArray<TIndex> Indices
-        {
-            get
-            {
-                ThrowIfNotCreated();
-                unsafe
-                {
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    AtomicSafetyHandle.CheckGetSecondaryDataPointerAndThrow(m_Safety);
-
-                    AtomicSafetyHandle secondarySafetyHandle = m_Safety;
-                    AtomicSafetyHandle.UseSecondaryVersion(ref secondarySafetyHandle);
-#endif
-                    LyonUnity.lyon_unity_buffer_get_indices(NativeHandle, out void* ptr, out int size);
-                    NativeArray<TIndex> array = NativeArrayUnsafeUtility.ConvertExistingDataToNativeArray<TIndex>(ptr, size, Allocator.None);
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-                    NativeArrayUnsafeUtility.SetAtomicSafetyHandle(ref array, secondarySafetyHandle);
-#endif
-                    return array;
-                }
-            }
-        }
+        public ref TVertex VertexAt(int i) => ref UnsafeUtility.As<byte, TVertex>(ref _vertexBuffer.ElementAt(i * sizeof(TVertex)));
+        public ref TIndex IndexAt(int i) => ref UnsafeUtility.As<byte, TIndex>(ref _indexBuffer.ElementAt(i * sizeof(TIndex)));
 
         public void Clear()
         {
-            ThrowIfNotCreated();
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
-#endif
-            LyonUnity.lyon_unity_buffer_clear(NativeHandle);
+            _vertexBuffer.Clear();
+            _indexBuffer.Clear();
         }
 
-        public readonly unsafe void AppendPathFill(NativePathBuilder pathBuilder, FillOptions? fillOptions = null)
+        public readonly void AppendPathFill(NativePathBuilder pathBuilder, FillOptions? fillOptions = null)
         {
-            ThrowIfNotCreated();
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
-#endif
-            FillOptions options = fillOptions ?? FillOptions.Default();
-            LyonUnity.lyon_unity_triangulate_fill(
-                NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Verbs),
-                pathBuilder.Verbs.Length,
-                ref options
-            );
+            this.ToRust().AppendPathFill(pathBuilder, fillOptions);
         }
 
-        public readonly unsafe void AppendPathStroke(NativePathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
+        public readonly void AppendPathStroke(NativePathBuilder pathBuilder, StrokeOptions? strokeOptions = null)
         {
-            ThrowIfNotCreated();
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            AtomicSafetyHandle.CheckWriteAndBumpSecondaryVersion(m_Safety);
-#endif
-            StrokeOptions options = strokeOptions ?? StrokeOptions.Default();
-            LyonUnity.lyon_unity_triangulate_stroke(
-                NativeHandle,
-                (Vector2*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Points),
-                (byte*) NativeArrayUnsafeUtility.GetUnsafeReadOnlyPtr(pathBuilder.Verbs),
-                pathBuilder.Verbs.Length,
-                ref options
-            );
+            this.ToRust().AppendPathStroke(pathBuilder, strokeOptions);
         }
 
         public void Dispose()
         {
-            if (NativeHandle != IntPtr.Zero)
+            if (_vertexBuffer.IsCreated)
             {
-                LyonUnity.lyon_unity_buffer_destroy(NativeHandle);
-                NativeHandle = IntPtr.Zero;
+                _vertexBuffer.Dispose();
             }
-
-#if ENABLE_UNITY_COLLECTIONS_CHECKS
-            if (AtomicSafetyHandle.IsValidNonDefaultHandle(m_Safety))
+            if (_indexBuffer.IsCreated)
             {
-                AtomicSafetyHandle.CheckDeallocateAndThrow(m_Safety);
-                AtomicSafetyHandle.Release(m_Safety);
+                _indexBuffer.Dispose();
             }
-#endif
         }
 
         public readonly JobHandle Dispose(JobHandle inputDeps)
         {
             return this.ScheduleDisposeJob(inputDeps);
-        }
-
-        internal readonly void ThrowIfNotCreated()
-        {
-            if (!IsCreated)
-            {
-                throw new NullReferenceException("Tessellator was Disposed of or never created.");
-            }
         }
     }
 }

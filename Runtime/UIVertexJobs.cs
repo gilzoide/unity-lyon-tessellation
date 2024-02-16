@@ -1,6 +1,4 @@
 using Unity.Burst;
-using Unity.Collections;
-using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using UnityEngine;
 using UnityEngine.UI;
@@ -54,29 +52,26 @@ namespace Gilzoide.LyonTesselation
 
         public readonly unsafe void Execute()
         {
-            using (NativeArray<UIVertex> vertices = _tessellator.Vertices)
+            for (int i = 0; i < _tessellator.VerticesLength; i++)
             {
-                UIVertex* verticesPtr = (UIVertex*) vertices.GetUnsafePtr();
-                for (int i = 0; i < vertices.Length; i++)
+                ref UIVertex vertex = ref _tessellator.VertexAt(i);
+                Vector3 position = vertex.position;
+                Vector2 normalizedPosition = Rect.PointToNormalized(_rect, position);
+                Vector4 uv = _uv is Vector4 uvRemap ? new Vector2(
+                    Mathf.Lerp(uvRemap.x, uvRemap.z, normalizedPosition.x),
+                    Mathf.Lerp(uvRemap.y, uvRemap.w, normalizedPosition.y)
+                ) : normalizedPosition;
+                vertex = new UIVertex
                 {
-                    Vector3 position = verticesPtr[i].position;
-                    Vector2 normalizedPosition = Rect.PointToNormalized(_rect, position);
-                    Vector4 uv = _uv is Vector4 uvRemap ? new Vector2(
-                        Mathf.Lerp(uvRemap.x, uvRemap.z, normalizedPosition.x),
-                        Mathf.Lerp(uvRemap.y, uvRemap.w, normalizedPosition.y)
-                    ) : normalizedPosition;
-                    verticesPtr[i] = new UIVertex
-                    {
-                        position = position,
-                        normal = Vector3.back,
-                        tangent = new Vector4(1, 0, 0, -1),
-                        color = _color,
-                        uv0 = uv,
-                        uv1 = uv,
-                        uv2 = uv,
-                        uv3 = uv,
-                    };
-                }
+                    position = position,
+                    normal = Vector3.back,
+                    tangent = new Vector4(1, 0, 0, -1),
+                    color = _color,
+                    uv0 = uv,
+                    uv1 = uv,
+                    uv2 = uv,
+                    uv3 = uv,
+                };
             }
         }
     }

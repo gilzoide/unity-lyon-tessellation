@@ -10,7 +10,7 @@ namespace Gilzoide.LyonTesselation
         public NativeArray<PathVerb> Verbs => _nativeHandle.Verbs;
 
         public NativePathBuilder NativeHandle => _nativeHandle;
-        private readonly NativePathBuilder _nativeHandle;
+        private NativePathBuilder _nativeHandle;
 
         public PathBuilder(Allocator allocator = Allocator.Persistent)
         {

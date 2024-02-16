@@ -1,3 +1,4 @@
+using Gilzoide.LyonTesselation.Internal;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Jobs;
@@ -42,12 +43,12 @@ namespace Gilzoide.LyonTesselation
     {
         public TessellationFillJob(NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, FillOptions? fillOptions)
         {
-            _tessellator = tessellator;
+            _tessellator = tessellator.ToRust();
             _pathBuilder = pathBuilder;
             _options = fillOptions;
         }
 
-        private NativeTessellator<TVertex, TIndex> _tessellator;
+        private TessellatorRust _tessellator;
         [ReadOnly] private NativePathBuilder _pathBuilder;
         private FillOptions? _options;
 
@@ -64,12 +65,12 @@ namespace Gilzoide.LyonTesselation
     {
         public TessellationStrokeJob(NativeTessellator<TVertex, TIndex> tessellator, NativePathBuilder pathBuilder, StrokeOptions? options)
         {
-            _tessellator = tessellator;
+            _tessellator = tessellator.ToRust();
             _pathBuilder = pathBuilder;
             _options = options;
         }
 
-        private NativeTessellator<TVertex, TIndex> _tessellator;
+        private TessellatorRust _tessellator;
         [ReadOnly] private NativePathBuilder _pathBuilder;
         StrokeOptions? _options;
 
