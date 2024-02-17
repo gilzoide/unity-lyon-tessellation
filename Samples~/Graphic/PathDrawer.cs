@@ -12,25 +12,29 @@ public class PathDrawer : Graphic
     public StrokeOptions StrokeOptions = StrokeOptions.Default();
     public bool Fill = true;
 
-    protected PathBuilder PathBuilder => _pathBuilder ??= new PathBuilder();
-    protected Tessellator<UIVertex, int> Tessellator => _tessellator ??= new Tessellator<UIVertex, int>();
-
     private PathBuilder _pathBuilder;
     private Tessellator<UIVertex, int> _tessellator;
     private JobHandle _jobHandle;
 
-    protected override void OnDestroy()
+    protected override void OnEnable()
     {
-        base.OnDestroy();
+        _pathBuilder = new();
+        _tessellator = new();
+        base.OnEnable();
+    }
+
+    protected override void OnDisable()
+    {
         _jobHandle.Complete();
         _tessellator?.Dispose();
         _pathBuilder?.Dispose();
+        base.OnDisable();
     }
 
     protected void Update()
     {
         Vector2 center = rectTransform.rect.center;
-        PathBuilder.Clear()
+        _pathBuilder.Clear()
             .AddCircle(center, 100)
             .AddCircle(new Vector2(center.x - 20, center.y + 20), 20)
             .AddCircle(new Vector2(center.x + 20, center.y + 20), 20)
@@ -42,16 +46,16 @@ public class PathDrawer : Graphic
                 )
             .Close();
 
-        Tessellator.Clear();
+        _tessellator.Clear();
         if (Fill)
         {
-            _jobHandle = Tessellator.CreatePathFillJob(PathBuilder, FillOptions).Schedule();
+            _jobHandle = _tessellator.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
         }
         else
         {
-            _jobHandle = Tessellator.CreatePathStrokeJob(PathBuilder, StrokeOptions).Schedule();
+            _jobHandle = _tessellator.CreatePathStrokeJob(_pathBuilder, StrokeOptions).Schedule();
         }
-        _jobHandle = Tessellator.CreateUIVertexJob(this).Schedule(_jobHandle);
+        _jobHandle = _tessellator.CreateUIVertexJob(this).Schedule(_jobHandle);
         SetVerticesDirty();
     }
 
