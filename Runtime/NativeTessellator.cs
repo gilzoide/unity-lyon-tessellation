@@ -15,7 +15,7 @@ namespace Gilzoide.LyonTesselation
         private NativeList<byte> _vertexBuffer;
         private NativeList<byte> _indexBuffer;
 
-        public NativeTessellator(Allocator allocator = Allocator.Persistent)
+        public NativeTessellator(Allocator allocator)
         {
             unsafe
             {
