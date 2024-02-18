@@ -72,7 +72,10 @@ namespace Gilzoide.LyonTesselation
 
         public readonly JobHandle Dispose(JobHandle inputDeps)
         {
-            return this.ScheduleDisposeJob(inputDeps);
+            return JobHandle.CombineDependencies(
+                _vertexBuffer.Dispose(inputDeps),
+                _indexBuffer.Dispose(inputDeps)
+            );
         }
     }
 }

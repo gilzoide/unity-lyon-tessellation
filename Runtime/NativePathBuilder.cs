@@ -190,7 +190,10 @@ namespace Gilzoide.LyonTesselation
 
         public readonly JobHandle Dispose(JobHandle inputDeps)
         {
-            return this.ScheduleDisposeJob(inputDeps);
+            return JobHandle.CombineDependencies(
+                _points.Dispose(inputDeps),
+                _verbs.Dispose(inputDeps)
+            );
         }
 
         internal readonly void ThrowIfBeganPath()
