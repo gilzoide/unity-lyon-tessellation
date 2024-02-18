@@ -1,5 +1,6 @@
 CARGO ?= cargo
 CP ?= cp
+LIPO ?= lipo
 
 SRC = $(wildcard src/*.rs) Cargo.toml Cargo.lock
 
@@ -20,18 +21,14 @@ all-windows: windows-x86_64
 target/%/release/liblyon_unity.dylib: $(SRC)
 	$(call CARGO_BUILD,$*)
 
-../Build/macOS/x86_64/liblyon_unity.dylib: target/x86_64-apple-darwin/release/liblyon_unity.dylib
-	$(CP) $< $@
-../Build/macOS/arm64/liblyon_unity.dylib: target/aarch64-apple-darwin/release/liblyon_unity.dylib
-	$(CP) $< $@
+../Build/macOS/universal/liblyon_unity.dylib: target/x86_64-apple-darwin/release/liblyon_unity.dylib target/aarch64-apple-darwin/release/liblyon_unity.dylib
+	$(LIPO) $^ -create -output $@
 ../Build/iOS/arm64/liblyon_unity.dylib: target/aarch64-apple-ios/release/liblyon_unity.dylib
 	$(CP) $< $@
 
-macos-x86_64: ../Build/macOS/x86_64/liblyon_unity.dylib
-macos-arm64: ../Build/macOS/arm64/liblyon_unity.dylib
+macos-universal: ../Build/macOS/universal/liblyon_unity.dylib
 ios-arm64: ../Build/iOS/arm64/liblyon_unity.dylib
-all-macos: macos-x86_64 macos-arm64
-all-apple: all-macos ios-arm64
+all-apple: macos-universal ios-arm64
 
 # Linux
 target/x86_64-unknown-linux-gnu/release/liblyon_unity.so: $(SRC)
