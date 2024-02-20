@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using AOT;
+using Unity.Burst;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
 using UnityEngine;
@@ -22,8 +23,8 @@ namespace Gilzoide.LyonTesselation.Internal
         {
             VerticesListPtr = vertices.GetUnsafeList();
             IndicesListPtr = indices.GetUnsafeList();
-            PushBytesFunctionPtr = RustInterop.PushBytesFunctionPtr;
-            GetLengthFunctionPtr = RustInterop.GetLengthFunctionPtr;
+            PushBytesFunctionPtr = RustInterop.PushBytesFunctionPtr.Data;
+            GetLengthFunctionPtr = RustInterop.GetLengthFunctionPtr.Data;
             VertexSize = vertexSize;
             IndexSize = indexSize;
         }
@@ -71,7 +72,7 @@ namespace Gilzoide.LyonTesselation.Internal
             list->Resize(currentSize + size, NativeArrayOptions.ClearMemory);
             return list->Ptr + currentSize;
         }
-        internal static readonly IntPtr PushBytesFunctionPtr = Marshal.GetFunctionPointerForDelegate<PushBytesDelegate>(PushBytes);
+        internal static readonly SharedStatic<IntPtr> PushBytesFunctionPtr = SharedStatic<IntPtr>.GetOrCreate<PushBytesDelegate>();
 
         internal delegate int GetLengthDelegate(UnsafeList<byte>* list);
         [MonoPInvokeCallback(typeof(GetLengthDelegate))]
@@ -79,13 +80,19 @@ namespace Gilzoide.LyonTesselation.Internal
         {
             return list->Length;
         }
-        internal static readonly IntPtr GetLengthFunctionPtr = Marshal.GetFunctionPointerForDelegate<GetLengthDelegate>(GetLength);
+        internal static readonly SharedStatic<IntPtr> GetLengthFunctionPtr = SharedStatic<IntPtr>.GetOrCreate<GetLengthDelegate>();
 
         internal static TessellatorRust ToRust<TVertex, TIndex>(this NativeTessellator<TVertex, TIndex> tessellator)
             where TVertex : unmanaged
             where TIndex : unmanaged
         {
             return new TessellatorRust(tessellator.VertexBuffer, tessellator.IndexBuffer, sizeof(TVertex), sizeof(TIndex));
+        }
+
+        internal static void InitializeSharedStatic()
+        {
+            PushBytesFunctionPtr.Data = Marshal.GetFunctionPointerForDelegate<PushBytesDelegate>(PushBytes);
+            GetLengthFunctionPtr.Data = Marshal.GetFunctionPointerForDelegate<GetLengthDelegate>(GetLength);
         }
     }
 }

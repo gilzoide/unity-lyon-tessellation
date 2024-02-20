@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Gilzoide.LyonTesselation.Internal;
 using Unity.Collections;
 using Unity.Collections.LowLevel.Unsafe;
@@ -76,6 +77,11 @@ namespace Gilzoide.LyonTesselation
                 _vertexBuffer.Dispose(inputDeps),
                 _indexBuffer.Dispose(inputDeps)
             );
+        }
+
+        static NativeTessellator()
+        {
+            RustInterop.InitializeSharedStatic();
         }
     }
 }
