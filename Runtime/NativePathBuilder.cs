@@ -7,6 +7,7 @@ namespace Gilzoide.LyonTesselation
 {
     public struct NativePathBuilder : IDisposable, INativeDisposable
     {
+        public readonly bool IsCreated => _points.IsCreated && _verbs.IsCreated;
         public readonly NativeArray<Vector2> Points => _points;
         public readonly NativeArray<PathVerb> Verbs => _verbs;
 

@@ -6,6 +6,7 @@ namespace Gilzoide.LyonTesselation
 {
     public class PathBuilder : IDisposable
     {
+        public bool IsCreated => _nativeHandle.IsCreated;
         public NativeArray<Vector2> Points => _nativeHandle.Points;
         public NativeArray<PathVerb> Verbs => _nativeHandle.Verbs;
 

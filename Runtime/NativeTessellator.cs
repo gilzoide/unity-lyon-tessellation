@@ -11,6 +11,13 @@ namespace Gilzoide.LyonTesselation
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
+        public readonly bool IsCreated => _vertexBuffer.IsCreated && _indexBuffer.IsCreated;
+        public readonly int VerticesLength => _vertexBuffer.Length / sizeof(TVertex);
+        public readonly int IndicesLength => _indexBuffer.Length / sizeof(TIndex);
+
+        public readonly NativeArray<TVertex> Vertices => _vertexBuffer.AsArray().Reinterpret<TVertex>(sizeof(byte));
+        public readonly NativeArray<TIndex> Indices => _indexBuffer.AsArray().Reinterpret<TIndex>(sizeof(byte));
+
         internal readonly NativeList<byte> VertexBuffer => _vertexBuffer;
         internal readonly NativeList<byte> IndexBuffer => _indexBuffer;
         private NativeList<byte> _vertexBuffer;
@@ -32,13 +39,6 @@ namespace Gilzoide.LyonTesselation
             _vertexBuffer = new NativeList<byte>(allocator);
             _indexBuffer = new NativeList<byte>(allocator);
         }
-
-        public readonly bool IsCreated => _vertexBuffer.IsCreated && _indexBuffer.IsCreated;
-        public readonly int VerticesLength => _vertexBuffer.Length / sizeof(TVertex);
-        public readonly int IndicesLength => _indexBuffer.Length / sizeof(TIndex);
-
-        public readonly NativeArray<TVertex> Vertices => _vertexBuffer.AsArray().Reinterpret<TVertex>(sizeof(byte));
-        public readonly NativeArray<TIndex> Indices => _indexBuffer.AsArray().Reinterpret<TIndex>(sizeof(byte));
 
         public ref TVertex VertexAt(int i) => ref UnsafeUtility.As<byte, TVertex>(ref _vertexBuffer.ElementAt(i * sizeof(TVertex)));
         public ref TIndex IndexAt(int i) => ref UnsafeUtility.As<byte, TIndex>(ref _indexBuffer.ElementAt(i * sizeof(TIndex)));

@@ -7,13 +7,6 @@ namespace Gilzoide.LyonTesselation
         where TVertex : unmanaged
         where TIndex : unmanaged
     {
-        public NativeTessellator<TVertex, TIndex> NativeHandle => _nativeHandle;
-        private NativeTessellator<TVertex, TIndex> _nativeHandle;
-
-        public Tessellator(Allocator allocator = Allocator.Persistent)
-        {
-            _nativeHandle = new NativeTessellator<TVertex, TIndex>(allocator);
-        }
 
         public bool IsCreated => _nativeHandle.IsCreated;
         public int VerticesLength => _nativeHandle.VerticesLength;
@@ -21,6 +14,14 @@ namespace Gilzoide.LyonTesselation
 
         public NativeArray<TVertex> Vertices => _nativeHandle.Vertices;
         public NativeArray<TIndex> Indices => _nativeHandle.Indices;
+
+        public NativeTessellator<TVertex, TIndex> NativeHandle => _nativeHandle;
+        private NativeTessellator<TVertex, TIndex> _nativeHandle;
+
+        public Tessellator(Allocator allocator = Allocator.Persistent)
+        {
+            _nativeHandle = new NativeTessellator<TVertex, TIndex>(allocator);
+        }
 
         public ref TVertex VertexAt(int i) => ref _nativeHandle.VertexAt(i);
         public ref TIndex IndexAt(int i) => ref _nativeHandle.IndexAt(i);
