@@ -23,7 +23,7 @@ impl UnityPathIterator {
     }
 
     unsafe fn pop_verb(&mut self) -> Option<u8> {
-        if self.verbs_left < 0 {
+        if self.verbs_left <= 0 {
             None
         }
         else {
