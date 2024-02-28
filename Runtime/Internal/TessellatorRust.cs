@@ -59,10 +59,10 @@ namespace Gilzoide.LyonTesselation.Internal
         internal const string LibraryPath = "lyon_unity";
 
         [DllImport(LibraryPath)]
-        internal static extern void lyon_unity_triangulate_fill(ref TessellatorRust buffer, Vector2* points, byte* verbs, int verbsLength, ref FillOptions options);
+        internal static extern int lyon_unity_triangulate_fill(ref TessellatorRust buffer, Vector2* points, byte* verbs, int verbsLength, ref FillOptions options);
 
         [DllImport(LibraryPath)]
-        internal static extern void lyon_unity_triangulate_stroke(ref TessellatorRust buffer, Vector2* points, byte* verbs, int verbsLength, ref StrokeOptions options);
+        internal static extern int lyon_unity_triangulate_stroke(ref TessellatorRust buffer, Vector2* points, byte* verbs, int verbsLength, ref StrokeOptions options);
 
         internal delegate byte* PushBytesDelegate(UnsafeList<byte>* list, int size);
         [MonoPInvokeCallback(typeof(PushBytesDelegate))]
