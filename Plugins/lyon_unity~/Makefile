@@ -2,7 +2,7 @@ CARGO ?= cargo
 CP ?= cp
 LIPO ?= lipo
 
-SRC = $(wildcard src/*.rs src_c/*.c src_c/*.h) Cargo.toml Cargo.lock
+SRC = $(wildcard src/*.rs src/c/*.c src/c/*.h) Cargo.toml Cargo.lock
 
 CARGO_BUILD = $(CARGO) build --release --target $(1)
 CARGO_BUILD_WITH_LINKER = CC=$(CC) AR=$(AR) $(CARGO) build --release --target $(1) --config target.$(1).linker=\"$(2)\"
