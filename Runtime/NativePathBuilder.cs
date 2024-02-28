@@ -20,23 +20,23 @@ namespace Gilzoide.LyonTesselation
             _verbs = new NativeList<PathVerb>(allocator);
         }
 
-        public void BeginAt(Vector2 at)
+        public void MoveTo(Vector2 position)
         {
-            ThrowIfBeganPath();
-            _points.Add(at);
+            End();
+            _points.Add(position);
             _verbs.Add(PathVerb.Begin);
         }
 
         public void LineTo(Vector2 to)
         {
-            ThrowIfNotBeganPath();
+            EnsureBegun();
             _points.Add(to);
             _verbs.Add(PathVerb.LineTo);
         }
 
         public void QuadraticBezierTo(Vector2 controlPoint, Vector2 to)
         {
-            ThrowIfNotBeganPath();
+            EnsureBegun();
             _points.Add(controlPoint);
             _points.Add(to);
             _verbs.Add(PathVerb.QuadraticBezierTo);
@@ -44,7 +44,7 @@ namespace Gilzoide.LyonTesselation
 
         public void CubicBezierTo(Vector2 controlPoint1, Vector2 controlPoint2, Vector2 to)
         {
-            ThrowIfNotBeganPath();
+            EnsureBegun();
             _points.Add(controlPoint1);
             _points.Add(controlPoint2);
             _points.Add(to);
@@ -53,14 +53,18 @@ namespace Gilzoide.LyonTesselation
 
         public void Close()
         {
-            ThrowIfNotBeganPath();
-            _verbs.Add(PathVerb.Close);
+            if (!IsEnded)
+            {
+                _verbs.Add(PathVerb.Close);
+            }
         }
 
         public void End()
         {
-            ThrowIfNotBeganPath();
-            _verbs.Add(PathVerb.End);
+            if (!IsEnded)
+            {
+                _verbs.Add(PathVerb.End);
+            }
         }
 
         public void Clear()
@@ -71,31 +75,27 @@ namespace Gilzoide.LyonTesselation
 
         public void AddLine(Vector2 from, Vector2 to)
         {
-            ThrowIfBeganPath();
-            BeginAt(from);
+            MoveTo(from);
             LineTo(to);
             End();
         }
 
         public void AddQuadraticBezier(Vector2 from, Vector2 control, Vector2 to)
         {
-            ThrowIfBeganPath();
-            BeginAt(from);
+            MoveTo(from);
             QuadraticBezierTo(control, to);
             End();
         }
 
         public void AddCubicBezier(Vector2 from, Vector2 control1, Vector2 control2, Vector2 to)
         {
-            ThrowIfBeganPath();
-            BeginAt(from);
+            MoveTo(from);
             CubicBezierTo(control1, control2, to);
             End();
         }
 
         public void AddEllipse(Vector2 center, Vector2 size)
         {
-            ThrowIfBeganPath();
             float w = size.x;
             float h = size.y;
             float x = center.x - w * 0.5f;
@@ -108,7 +108,7 @@ namespace Gilzoide.LyonTesselation
             float ye = y + h;            // y-end
             float xm = x + w * 0.5f;     // x-middle
             float ym = y + h * 0.5f;     // y-middle
-            BeginAt(new Vector2(x, ym));
+            MoveTo(new Vector2(x, ym));
             CubicBezierTo(new Vector2(x, ym - oy), new Vector2(xm - ox, y), new Vector2(xm, y));
             CubicBezierTo(new Vector2(xm + ox, y), new Vector2(xe, ym - oy), new Vector2(xe, ym));
             CubicBezierTo(new Vector2(xe, ym + oy), new Vector2(xm + ox, ye), new Vector2(xm, ye));
@@ -127,7 +127,7 @@ namespace Gilzoide.LyonTesselation
             float xMax = rect.xMax;
             float yMin = rect.yMin;
             float yMax = rect.yMax;
-            BeginAt(new Vector2(xMin, yMin));
+            MoveTo(new Vector2(xMin, yMin));
             LineTo(new Vector2(xMin, yMax));
             LineTo(new Vector2(xMax, yMax));
             LineTo(new Vector2(xMax, yMin));
@@ -145,7 +145,7 @@ namespace Gilzoide.LyonTesselation
                 // Reference: https://pomax.github.io/bezierinfo/#circles_cubic
                 const float factor = 0.551785f;
                 float controlOffset = cornerRadius * factor;
-                BeginAt(new Vector2(xMin, yMin + cornerRadius));
+                MoveTo(new Vector2(xMin, yMin + cornerRadius));
                 CubicBezierTo(
                     new Vector2(xMin, yMin + cornerRadius - controlOffset),
                     new Vector2(xMin + cornerRadius - controlOffset, yMin),
@@ -197,34 +197,30 @@ namespace Gilzoide.LyonTesselation
             );
         }
 
-        internal readonly void ThrowIfBeganPath()
+        internal void EnsureBegun()
         {
-            for (int i = _verbs.Length - 1; i >= 0; i--)
+            if (IsEnded)
             {
-                switch (_verbs[i])
-                {
-                    case PathVerb.Close:
-                    case PathVerb.End:
-                        return;
-
-                    case PathVerb.Begin:
-                        throw new InvalidOperationException("This method cannot be called while building path. Please call End or Close.");
-                }
+                MoveTo(Vector2.zero);
             }
         }
 
-        internal readonly void ThrowIfNotBeganPath()
+        internal readonly bool IsEnded
         {
-            for (int i = _verbs.Length - 1; i >= 0; i--)
+            get
             {
-                switch (_verbs[i])
+                if (_verbs.Length == 0)
                 {
-                    case PathVerb.Begin:
-                        return;
-
+                    return true;
+                }
+                switch (_verbs[_verbs.Length - 1])
+                {
                     case PathVerb.Close:
                     case PathVerb.End:
-                        throw new InvalidOperationException("This method can only be called while building path. Please call BeginAt.");
+                        return true;
+
+                    default:
+                        return false;
                 }
             }
         }

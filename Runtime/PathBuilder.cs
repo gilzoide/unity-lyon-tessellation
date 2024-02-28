@@ -23,9 +23,9 @@ namespace Gilzoide.LyonTesselation
             Dispose();
         }
 
-        public PathBuilder BeginAt(Vector2 at)
+        public PathBuilder MoveTo(Vector2 position)
         {
-            _nativeHandle.BeginAt(at);
+            _nativeHandle.MoveTo(position);
             return this;
         }
 

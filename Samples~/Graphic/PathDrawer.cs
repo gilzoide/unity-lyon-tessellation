@@ -38,7 +38,7 @@ public class PathDrawer : Graphic
             .AddCircle(center, 100)
             .AddCircle(new Vector2(center.x - 20, center.y + 20), 20)
             .AddCircle(new Vector2(center.x + 20, center.y + 20), 20)
-            .BeginAt(new Vector2(center.x - 30, center.y - 5))
+            .MoveTo(new Vector2(center.x - 30, center.y - 5))
                 .CubicBezierTo(
                     new Vector2(center.x - 30, center.y - 45),
                     new Vector2(center.x + 30, center.y - 45),
