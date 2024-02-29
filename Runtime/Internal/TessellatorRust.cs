@@ -14,19 +14,20 @@ namespace Gilzoide.LyonTesselation.Internal
         [NativeDisableUnsafePtrRestriction] public UnsafeList<byte>* IndicesListPtr;
 
         [NativeDisableUnsafePtrRestriction] public IntPtr PushBytesFunctionPtr;
-        [NativeDisableUnsafePtrRestriction] public IntPtr GetLengthFunctionPtr;
 
         public int VertexSize;
         public int IndexSize;
+
+        public byte IsIndex16;
 
         public TessellatorRust(NativeList<byte> vertices, NativeList<byte> indices, int vertexSize, int indexSize)
         {
             VerticesListPtr = vertices.GetUnsafeList();
             IndicesListPtr = indices.GetUnsafeList();
             PushBytesFunctionPtr = RustInterop.PushBytesFunctionPtr.Data;
-            GetLengthFunctionPtr = RustInterop.GetLengthFunctionPtr.Data;
             VertexSize = vertexSize;
             IndexSize = indexSize;
+            IsIndex16 = (byte) (indexSize < sizeof(int) ? 1 : 0);
         }
 
         public void AppendPathFill(NativePathBuilder pathBuilder, FillOptions? fillOptions = null)
@@ -69,18 +70,10 @@ namespace Gilzoide.LyonTesselation.Internal
         internal static byte* PushBytes(UnsafeList<byte>* list, int size)
         {
             var currentSize = list->Length;
-            list->Resize(currentSize + size, NativeArrayOptions.ClearMemory);
+            list->Resize(currentSize + size, NativeArrayOptions.UninitializedMemory);
             return list->Ptr + currentSize;
         }
         internal static readonly SharedStatic<IntPtr> PushBytesFunctionPtr = SharedStatic<IntPtr>.GetOrCreate<PushBytesDelegate>();
-
-        internal delegate int GetLengthDelegate(UnsafeList<byte>* list);
-        [MonoPInvokeCallback(typeof(GetLengthDelegate))]
-        internal static int GetLength(UnsafeList<byte>* list)
-        {
-            return list->Length;
-        }
-        internal static readonly SharedStatic<IntPtr> GetLengthFunctionPtr = SharedStatic<IntPtr>.GetOrCreate<GetLengthDelegate>();
 
         internal static TessellatorRust ToRust<TVertex, TIndex>(this NativeTessellator<TVertex, TIndex> tessellator)
             where TVertex : unmanaged
@@ -92,7 +85,6 @@ namespace Gilzoide.LyonTesselation.Internal
         internal static void InitializeSharedStatic()
         {
             PushBytesFunctionPtr.Data = Marshal.GetFunctionPointerForDelegate<PushBytesDelegate>(PushBytes);
-            GetLengthFunctionPtr.Data = Marshal.GetFunctionPointerForDelegate<GetLengthDelegate>(GetLength);
         }
     }
 }
