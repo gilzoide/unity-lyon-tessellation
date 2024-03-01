@@ -6,7 +6,7 @@ namespace Gilzoide.LyonTesselation
     [Serializable]
     public struct FillOptions
     {
-        [Min(0.01f)] public float Tolerance;
+        [Min(0.001f)] public float Tolerance;
         public FillRule FillRule;
         public SweepOrientation SweepOrientation;
         public bool HandleIntersections;
