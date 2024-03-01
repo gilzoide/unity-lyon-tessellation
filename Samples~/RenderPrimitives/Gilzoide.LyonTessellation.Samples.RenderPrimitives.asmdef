@@ -1,0 +1,16 @@
+{
+    "name": "Gilzoide.LyonTessellation.Samples.RenderPrimitives",
+    "rootNamespace": "Gilzoide.LyonTessellation.Samples.RenderPrimitives",
+    "references": [
+        "Gilzoide.LyonTesselation"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

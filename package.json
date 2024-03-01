@@ -18,6 +18,11 @@
         "displayName": "UI Graphic using paths",
         "description": "Simple sample showing how to fill a Graphic mesh using PathBuilder and Tessellator.",
         "path": "Samples~/Graphic"
+    },
+    {
+        "displayName": "Render Primitives",
+        "description": "Sample showing how to render tessellated data using the raw Graphic.RenderPrimitivesIndexed",
+        "path": "Samples~/RenderPrimitives"
     }
   ]
 }
