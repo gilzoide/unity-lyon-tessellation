@@ -23,6 +23,11 @@
         "displayName": "Render Primitives",
         "description": "Sample showing how to render tessellated data using the raw Graphic.RenderPrimitivesIndexed",
         "path": "Samples~/RenderPrimitives"
+    },
+    {
+        "displayName": "Update Mesh",
+        "description": "Sample showing how to upload tessellated data to Meshes dynamically.",
+        "path": "Samples~/UpdateMesh"
     }
   ]
 }
