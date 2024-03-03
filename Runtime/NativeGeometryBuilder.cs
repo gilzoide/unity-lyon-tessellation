@@ -79,6 +79,13 @@ namespace Gilzoide.LyonTesselation
             return (uint) currentIndex;
         }
 
+        public void AddTriangle(uint index1, uint index2, uint index3)
+        {
+            AddIndex(index1);
+            AddIndex(index2);
+            AddIndex(index3);
+        }
+
         public void AddIndex(uint index)
         {
             TIndex newIndex = default;

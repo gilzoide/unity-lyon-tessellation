@@ -8,7 +8,7 @@ const TOO_MANY_VERTICES: u32 = u32::MAX;
 #[repr(C)]
 pub struct UnityGeometryBuilder {
     add_vertex_ptr: extern "C" fn(&mut UnityGeometryBuilder, f32, f32) -> u32,
-    add_index_ptr: extern "C" fn(&mut UnityGeometryBuilder, u32),
+    add_triangle_ptr: extern "C" fn(&mut UnityGeometryBuilder, u32, u32, u32),
 }
 
 impl UnityGeometryBuilder {
@@ -20,17 +20,15 @@ impl UnityGeometryBuilder {
         }
     }
 
-    unsafe fn add_index(&mut self, index: VertexId) {
-        (self.add_index_ptr)(self, index.0)
+    unsafe fn add_triangle_indices(&mut self, a: u32, b: u32, c: u32) {
+        (self.add_triangle_ptr)(self, a, b, c)
     }
 }
 
 impl GeometryBuilder for UnityGeometryBuilder {
     fn add_triangle(&mut self, a: VertexId, b: VertexId, c: VertexId) {
         unsafe {
-            self.add_index(a);
-            self.add_index(b);
-            self.add_index(c);
+            self.add_triangle_indices(a.0, b.0, c.0);
         }
     }
 }

@@ -3,7 +3,7 @@ namespace Gilzoide.LyonTesselation
     public interface IGeometryBuilder
     {
         uint AddVertex(float x, float y);
-        void AddIndex(uint index);
+        void AddTriangle(uint index1, uint index2, uint index3);
     }
 
     public static class GeometryBuilderError

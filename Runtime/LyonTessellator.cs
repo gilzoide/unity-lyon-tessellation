@@ -17,7 +17,7 @@ namespace Gilzoide.LyonTesselation
             _vTable = new LyonGeometryBuilderVTable
             {
                 AddVertex_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddVertexDelegate>(AddVertex),
-                AddIndex_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddIndexDelegate>(AddIndex),
+                AddTriangle_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddTriangleDelegate>(AddIndex),
             };
             GeometryBuilder = geometryBuilder;
         }
@@ -62,20 +62,20 @@ namespace Gilzoide.LyonTesselation
             return UnsafeUtility.AsRef<TGeometryBuilder>(&geometryBuilder[1]).AddVertex(x, y);
         }
 
-        [MonoPInvokeCallback(typeof(LyonGeometryBuilderVTable.AddIndexDelegate))]
-        private static void AddIndex(LyonGeometryBuilderVTable* geometryBuilder, uint index)
+        [MonoPInvokeCallback(typeof(LyonGeometryBuilderVTable.AddTriangleDelegate))]
+        private static void AddIndex(LyonGeometryBuilderVTable* geometryBuilder, uint index1, uint index2, uint index3)
         {
-            UnsafeUtility.AsRef<TGeometryBuilder>(&geometryBuilder[1]).AddIndex(index);
+            UnsafeUtility.AsRef<TGeometryBuilder>(&geometryBuilder[1]).AddTriangle(index1, index2, index3);
         }
     }
 
     internal unsafe struct LyonGeometryBuilderVTable
     {
         [NativeDisableUnsafePtrRestriction] public IntPtr AddVertex_ptr;
-        [NativeDisableUnsafePtrRestriction] public IntPtr AddIndex_ptr;
+        [NativeDisableUnsafePtrRestriction] public IntPtr AddTriangle_ptr;
 
         public delegate uint AddVertexDelegate(LyonGeometryBuilderVTable* geometryBuilder, float x, float y);
-        public delegate void AddIndexDelegate(LyonGeometryBuilderVTable* geometryBuilder, uint index);
+        public delegate void AddTriangleDelegate(LyonGeometryBuilderVTable* geometryBuilder, uint index1, uint index2, uint index3);
     }
 
     internal struct GeometryBuilderHandle : IGeometryBuilder, IDisposable
@@ -101,9 +101,9 @@ namespace Gilzoide.LyonTesselation
             return ((IGeometryBuilder) _geometryBuilderHandle.Target).AddVertex(x, y);
         }
 
-        public void AddIndex(uint index)
+        public void AddTriangle(uint index1, uint index2, uint index3)
         {
-            ((IGeometryBuilder) _geometryBuilderHandle.Target).AddIndex(index);
+            ((IGeometryBuilder) _geometryBuilderHandle.Target).AddTriangle(index1, index2, index3);
         }
     }
 
