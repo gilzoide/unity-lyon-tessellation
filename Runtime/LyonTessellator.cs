@@ -16,8 +16,8 @@ namespace Gilzoide.LyonTesselation
         {
             _vTable = new LyonGeometryBuilderVTable
             {
-                AddVertex_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddVertexDelegate>(AddVertex),
-                AddTriangle_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddTriangleDelegate>(AddIndex),
+                AddVertex_ptr = AddVertex_ptr,
+                AddTriangle_ptr = AddTriangle_ptr,
             };
             GeometryBuilder = geometryBuilder;
         }
@@ -61,12 +61,14 @@ namespace Gilzoide.LyonTesselation
         {
             return UnsafeUtility.AsRef<TGeometryBuilder>(&geometryBuilder[1]).AddVertex(x, y);
         }
+        private static readonly IntPtr AddVertex_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddVertexDelegate>(AddVertex);
 
         [MonoPInvokeCallback(typeof(LyonGeometryBuilderVTable.AddTriangleDelegate))]
-        private static void AddIndex(LyonGeometryBuilderVTable* geometryBuilder, uint index1, uint index2, uint index3)
+        private static void AddTriangle(LyonGeometryBuilderVTable* geometryBuilder, uint index1, uint index2, uint index3)
         {
             UnsafeUtility.AsRef<TGeometryBuilder>(&geometryBuilder[1]).AddTriangle(index1, index2, index3);
         }
+        private static readonly IntPtr AddTriangle_ptr = Marshal.GetFunctionPointerForDelegate<LyonGeometryBuilderVTable.AddTriangleDelegate>(AddTriangle);
     }
 
     internal unsafe struct LyonGeometryBuilderVTable
