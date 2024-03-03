@@ -7,25 +7,25 @@ namespace Gilzoide.LyonTesselation
 {
     public static class UIVertexJobs
     {
-        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this Tessellator<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this GeometryBuilder<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
             where TIndex : unmanaged
         {
             return tessellator.NativeHandle.CreateUIVertexJob(graphic.color, graphic.rectTransform.rect, uv);
         }
 
-        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeTessellator<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeGeometryBuilder<UIVertex, TIndex> tessellator, Graphic graphic, Vector4? uv = null)
             where TIndex : unmanaged
         {
             return tessellator.CreateUIVertexJob(graphic.color, graphic.rectTransform.rect, uv);
         }
 
-        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this Tessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this GeometryBuilder<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
             where TIndex : unmanaged
         {
             return tessellator.NativeHandle.CreateUIVertexJob(color,rect, uv);
         }
 
-        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeTessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
+        public static TessellationUIVertexJob<TIndex> CreateUIVertexJob<TIndex>(this NativeGeometryBuilder<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv = null)
             where TIndex : unmanaged
         {
             return new TessellationUIVertexJob<TIndex>(tessellator, color, rect, uv);
@@ -37,24 +37,24 @@ namespace Gilzoide.LyonTesselation
     public struct TessellationUIVertexJob<TIndex> : IJob
         where TIndex : unmanaged
     {
-        public TessellationUIVertexJob(NativeTessellator<UIVertex, TIndex> tessellator, Color32 color, Rect rect, Vector4? uv)
+        public TessellationUIVertexJob(NativeGeometryBuilder<UIVertex, TIndex> geometryBuilder, Color32 color, Rect rect, Vector4? uv)
         {
-            _tessellator = tessellator;
+            _geometry = geometryBuilder;
             _color = color;
             _rect = rect;
             _uv = uv;
         }
 
-        private NativeTessellator<UIVertex, TIndex> _tessellator;
+        private NativeGeometryBuilder<UIVertex, TIndex> _geometry;
         private Color32 _color;
         private Rect _rect;
         private Vector4? _uv;
 
         public readonly unsafe void Execute()
         {
-            for (int i = 0; i < _tessellator.VerticesLength; i++)
+            for (int i = 0, count = _geometry.Vertices.Length; i < count; i++)
             {
-                ref UIVertex vertex = ref _tessellator.VertexAt(i);
+                ref UIVertex vertex = ref _geometry.Vertices.ElementAt(i);
                 Vector3 position = vertex.position;
                 Vector2 normalizedPosition = Rect.PointToNormalized(_rect, position);
                 Vector4 uv = _uv is Vector4 uvRemap ? new Vector2(

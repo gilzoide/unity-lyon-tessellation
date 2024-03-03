@@ -2,7 +2,8 @@
     "name": "Gilzoide.LyonTessellation.Samples.Graphic",
     "rootNamespace": "",
     "references": [
-        "Gilzoide.LyonTesselation"
+        "Gilzoide.LyonTesselation",
+        "Unity.Collections"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

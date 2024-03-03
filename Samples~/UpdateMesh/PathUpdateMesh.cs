@@ -12,7 +12,7 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
 
         private Mesh _mesh;
         private PathBuilder _pathBuilder;
-        private Tessellator<Vector3, ushort> _tessellator;
+        private GeometryBuilder<Vector3, ushort> _tessellator;
         private JobHandle _jobHandle;
 
         protected void Start()
@@ -66,28 +66,14 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
             {
                 _jobHandle = _tessellator.CreatePathStrokeJob(_pathBuilder, StrokeOptions).Schedule();
             }
-            _jobHandle = new FillZJob { Tessellator = _tessellator }.Schedule(_jobHandle);
         }
 
         protected void LateUpdate()
         {
             _jobHandle.Complete();
-            _mesh.SetVertices(_tessellator.Vertices);
-            _mesh.SetIndices(_tessellator.Indices, MeshTopology.Triangles, 0);
+            _mesh.SetVertices(_tessellator.Vertices.AsArray());
+            _mesh.SetIndices(_tessellator.Indices.AsArray(), MeshTopology.Triangles, 0);
             _mesh.UploadMeshData(false);
-        }
-
-        private struct FillZJob : IJob
-        {
-            public NativeTessellator<Vector3, ushort> Tessellator;
-
-            public void Execute()
-            {
-                for (int i = 0; i < Tessellator.VerticesLength; i++)
-                {
-                    Tessellator.VertexAt(i).z = 0;
-                }
-            }
         }
     }
 }

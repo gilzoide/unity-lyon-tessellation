@@ -1,66 +1,27 @@
-use std::convert::TryFrom;
 use lyon_tessellation::{GeometryBuilder, FillGeometryBuilder, FillVertex, StrokeGeometryBuilder, StrokeVertex, VertexId};
 use lyon_tessellation::geometry_builder::GeometryBuilderError;
 use lyon_tessellation::math::Point;
 
-#[repr(C)]
-pub struct UnityUnsafeList {
-    pub(crate) ptr: *mut u8,
-    pub(crate) length: i32,
-    pub(crate) capacity: i32,
-}
-
-impl UnityUnsafeList {
-    pub unsafe fn push(&mut self, size: i32, push_func: extern "C" fn(&mut UnityUnsafeList, i32) -> *mut u8) -> *mut u8 {
-        if self.length + size <= self.capacity {
-            let ptr = self.ptr.add(self.length as usize);
-            self.length += size;
-            ptr
-        }
-        else {
-            push_func(self, size)
-        }
-    }
-}
+const INVALID_VERTEX: u32 = u32::MAX - 1;
+const TOO_MANY_VERTICES: u32 = u32::MAX;
 
 #[repr(C)]
 pub struct UnityGeometryBuilder {
-    vertices_list_ptr: *mut UnityUnsafeList,
-    indices_list_ptr: *mut UnityUnsafeList,
-
-    push_bytes_func: extern "C" fn(&mut UnityUnsafeList, i32) -> *mut u8,
-
-    vertex_size: i32,
-    index_size: i32,
-
-    is_index_16: u8,
+    add_vertex_ptr: extern "C" fn(&mut UnityGeometryBuilder, f32, f32) -> u32,
+    add_index_ptr: extern "C" fn(&mut UnityGeometryBuilder, u32),
 }
 
 impl UnityGeometryBuilder {
     unsafe fn add_vertex(&mut self, position: Point) -> Result<VertexId, GeometryBuilderError> {
-        let byte_len = (*self.vertices_list_ptr).length;
-        if byte_len >= i32::MAX - self.vertex_size {
-            Err(GeometryBuilderError::TooManyVertices)
-        }
-        else {
-            let vertex_id = byte_len / self.vertex_size;
-            let vertex_ptr = (*self.vertices_list_ptr).push(self.vertex_size, self.push_bytes_func);
-            *(vertex_ptr as *mut f32) = position.x;
-            *(vertex_ptr as *mut f32).add(1) = position.y;
-            Ok(VertexId(vertex_id as u32))
+        match (self.add_vertex_ptr)(self, position.x, position.y) {
+            TOO_MANY_VERTICES => Err(GeometryBuilderError::TooManyVertices),
+            INVALID_VERTEX => Err(GeometryBuilderError::InvalidVertex),
+            vertex_id => Ok(VertexId(vertex_id)),
         }
     }
 
     unsafe fn add_index(&mut self, index: VertexId) {
-        let index_ptr = (*self.indices_list_ptr).push(self.index_size, self.push_bytes_func);
-        if self.is_index_16 != 0 {
-            if let Ok(i) = u16::try_from(index.0) {
-                *(index_ptr as *mut u16) = i;
-            }
-        }
-        else {
-            *(index_ptr as *mut u32) = index.0;
-        }
+        (self.add_index_ptr)(self, index.0)
     }
 }
 

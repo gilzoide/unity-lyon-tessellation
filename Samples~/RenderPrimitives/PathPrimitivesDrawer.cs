@@ -17,7 +17,7 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
         public Material Material;
 
         private PathBuilder _pathBuilder;
-        private Tessellator<Vertex, Index> _tessellator;
+        private GeometryBuilder<Vertex, Index> _tessellator;
         private JobHandle _jobHandle;
         private GraphicsBuffer _vertexBuffer;
         private GraphicsBuffer _indexBuffer;
@@ -72,7 +72,7 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
         {
             _jobHandle.Complete();
 
-            if (_tessellator.VerticesLength == 0 || _tessellator.IndicesLength == 0)
+            if (_tessellator.Vertices.Length == 0 || _tessellator.Indices.Length == 0)
             {
                 return;
             }
@@ -81,25 +81,25 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
             {
                 _materialProperties = new MaterialPropertyBlock();
             }
-            if (_vertexBuffer == null || _vertexBuffer.count < _tessellator.VerticesLength)
+            if (_vertexBuffer == null || _vertexBuffer.count < _tessellator.Vertices.Length)
             {
                 _vertexBuffer?.Dispose();
-                _vertexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Vertex, GraphicsBuffer.UsageFlags.LockBufferForWrite, _tessellator.VerticesLength, UnsafeUtility.SizeOf<Vertex>());
+                _vertexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Vertex, GraphicsBuffer.UsageFlags.LockBufferForWrite, _tessellator.Vertices.Length, UnsafeUtility.SizeOf<Vertex>());
                 _materialProperties.SetBuffer(ShaderProperties.Positions, _vertexBuffer);
             }
-            if (_indexBuffer == null || _indexBuffer.count < _tessellator.IndicesLength)
+            if (_indexBuffer == null || _indexBuffer.count < _tessellator.Indices.Length)
             {
                 _indexBuffer?.Dispose();
-                _indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, GraphicsBuffer.UsageFlags.LockBufferForWrite, _tessellator.IndicesLength, UnsafeUtility.SizeOf<Index>());
+                _indexBuffer = new GraphicsBuffer(GraphicsBuffer.Target.Index, GraphicsBuffer.UsageFlags.LockBufferForWrite, _tessellator.Indices.Length, UnsafeUtility.SizeOf<Index>());
             }
 
-            var vertexData = _vertexBuffer.LockBufferForWrite<Vertex>(0, _tessellator.VerticesLength);
-            _tessellator.Vertices.CopyTo(vertexData);
-            _vertexBuffer.UnlockBufferAfterWrite<Vertex>(_tessellator.VerticesLength);
+            var vertexData = _vertexBuffer.LockBufferForWrite<Vertex>(0, _tessellator.Vertices.Length);
+            _tessellator.Vertices.AsArray().CopyTo(vertexData);
+            _vertexBuffer.UnlockBufferAfterWrite<Vertex>(_tessellator.Vertices.Length);
 
-            var indexData = _indexBuffer.LockBufferForWrite<Index>(0, _tessellator.IndicesLength);
-            _tessellator.Indices.CopyTo(indexData);
-            _indexBuffer.UnlockBufferAfterWrite<Index>(_tessellator.IndicesLength);
+            var indexData = _indexBuffer.LockBufferForWrite<Index>(0, _tessellator.Indices.Length);
+            _tessellator.Indices.AsArray().CopyTo(indexData);
+            _indexBuffer.UnlockBufferAfterWrite<Index>(_tessellator.Indices.Length);
 
             _materialProperties.SetMatrix(ShaderProperties.ObjectToWorld, transform.localToWorldMatrix);
 
@@ -108,7 +108,7 @@ namespace Gilzoide.LyonTessellation.Samples.RenderPrimitives
                 matProps = _materialProperties,
                 worldBounds = new Bounds(transform.position, new Vector3(2, 2, 0))
             };
-            Graphics.RenderPrimitivesIndexed(renderParams, MeshTopology.Triangles, _indexBuffer, _tessellator.IndicesLength);
+            Graphics.RenderPrimitivesIndexed(renderParams, MeshTopology.Triangles, _indexBuffer, _tessellator.Indices.Length);
         }
     }
 }

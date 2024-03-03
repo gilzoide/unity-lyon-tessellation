@@ -13,20 +13,20 @@ public class PathDrawer : Graphic
     public bool Fill = true;
 
     private PathBuilder _pathBuilder;
-    private Tessellator<UIVertex, int> _tessellator;
+    private GeometryBuilder<UIVertex, int> _geometryBuilder;
     private JobHandle _jobHandle;
 
     protected override void OnEnable()
     {
         _pathBuilder = new();
-        _tessellator = new();
+        _geometryBuilder = new();
         base.OnEnable();
     }
 
     protected override void OnDisable()
     {
         _jobHandle.Complete();
-        _tessellator?.Dispose();
+        _geometryBuilder?.Dispose();
         _pathBuilder?.Dispose();
         base.OnDisable();
     }
@@ -46,16 +46,16 @@ public class PathDrawer : Graphic
                 )
             .Close();
 
-        _tessellator.Clear();
+        _geometryBuilder.Clear();
         if (Fill)
         {
-            _jobHandle = _tessellator.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
+            _jobHandle = _geometryBuilder.CreatePathFillJob(_pathBuilder, FillOptions).Schedule();
         }
         else
         {
-            _jobHandle = _tessellator.CreatePathStrokeJob(_pathBuilder, StrokeOptions).Schedule();
+            _jobHandle = _geometryBuilder.CreatePathStrokeJob(_pathBuilder, StrokeOptions).Schedule();
         }
-        _jobHandle = _tessellator.CreateUIVertexJob(this).Schedule(_jobHandle);
+        _jobHandle = _geometryBuilder.CreateUIVertexJob(this).Schedule(_jobHandle);
         SetVerticesDirty();
     }
 
@@ -66,8 +66,8 @@ public class PathDrawer : Graphic
         using (ListPool<UIVertex>.Get(out List<UIVertex> vertices))
         using (ListPool<int>.Get(out List<int> indices))
         {
-            vertices.AddRange(_tessellator.Vertices);
-            indices.AddRange(_tessellator.Indices);
+            vertices.AddRange(_geometryBuilder.Vertices.AsArray());
+            indices.AddRange(_geometryBuilder.Indices.AsArray());
             vh.AddUIVertexStream(vertices, indices);
         }
     }
